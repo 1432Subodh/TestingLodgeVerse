@@ -8,7 +8,7 @@ import Image from 'next/image'
 
 function Navbar() {
   return (
-    <div className='flex items-center justify-between sm:px-10 px-4 py-2 border-b'>
+    <div className='flex items-center justify-between sm:px-10 px-4 py-2 border-b fixed top-0 left-0 w-full backdrop-blur-sm z-50 '>
       <div className='flex items-center gap-10'>
 
         <div className='flex gap-2 items-center'>

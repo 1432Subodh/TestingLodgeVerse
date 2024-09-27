@@ -26,11 +26,24 @@ body {
   }
 } */
 
-.video-style {
-  border-radius: 50px;
-  background: linear-gradient(145deg, #f0f0f0, #cacaca);
-  box-shadow: 31px 31px 62px #dcdcdc, -31px -31px 62px #e4e4e4;
+/* Set the width of the scrollbar */
+::-webkit-scrollbar {
+  width: 2px;
 }
+
+/* Set the color of the scrollbar track */
+
+
+/* Set the color of the scrollbar thumb */
+::-webkit-scrollbar-thumb {
+  background-color: #ffffff21; /* Zinc color */
+}
+
+/* Set the color when hovering over the scrollbar */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #00000000; /* Adjust as needed */
+}
+
 
 
 @layer base {

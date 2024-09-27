@@ -25,6 +25,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // const scroll = new LocomotiveScroll();
   return (
     <html lang="en">
       <body
