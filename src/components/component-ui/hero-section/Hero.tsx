@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button'
 import { ArrowRight, BoxIcon } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import React, { useEffect, useRef } from 'react'
 
 const Hero: React.FC = () => {
@@ -42,7 +43,7 @@ const Hero: React.FC = () => {
       <h2 className="scroll-m-20 text-4xl px-3 font-extrabold tracking-tight lg:text-5xl text-center -z-20">Find your stay easily in Hazaribagh</h2>
       <p className="leading-5 my-3 text-sm font-semibold text-center w-[90%] sm:px-[300px] px-5">The king, seeing how much happier his subjects were, realized the error of his ways and repealed the joke tax. </p>
       <div className='flex items-center gap-3'>
-        <Button variant={'default'} className='border py-[19px]'>Get Started</Button>
+        <Link href={'/lodge'}><Button variant={'default'} className='border py-[19px]'>Get Started</Button></Link>
         <Button variant={'outline'} className='border py-[19px]'>Github</Button>
       </div>
     </div>
