@@ -2,7 +2,7 @@ import Image from 'next/image'
 import React from 'react'
 import { Bebas_Neue } from 'next/font/google';
 
-const BebasNeue = Bebas_Neue({
+export const BebasNeue = Bebas_Neue({
     subsets: ['latin'],
     weight: ['400'], // Define font weights
     style: ['normal'], // Optional: set style

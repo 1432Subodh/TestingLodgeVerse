@@ -11,7 +11,7 @@ export default function Home() {
     <div className="">
       <Hero />
       <SecondSection />
-      {/* <Footer/> */}
+      <Footer/>
 
     </div>
   );
