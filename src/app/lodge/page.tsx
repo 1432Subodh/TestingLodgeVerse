@@ -3,9 +3,16 @@ import {
   CardContent,
 
 } from "@/components/ui/card"
-import { Fredoka_font } from "./layout"
 import Image from "next/image"
 import { IndianRupee } from "lucide-react"
+import { Fredoka } from "next/font/google";
+
+
+export const Fredoka_font = Fredoka({
+    subsets: ['latin'],
+    weight: ['400'], // Define font weights
+    style: ['normal'], // Optional: set style
+});
 
 
 function page() {
