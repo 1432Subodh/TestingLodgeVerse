@@ -5,20 +5,12 @@ import {
 } from "@/components/ui/card"
 import Image from "next/image"
 import { IndianRupee } from "lucide-react"
-import { Fredoka } from "next/font/google";
-
-
-export const Fredoka_font = Fredoka({
-    subsets: ['latin'],
-    weight: ['400'], // Define font weights
-    style: ['normal'], // Optional: set style
-});
 
 
 function page() {
   return (
     <div className="pt-16 sm:px-10 px-4 sm:pl-[270px]">
-      <h1 className={`${Fredoka_font.className} font-bold pb-4 sm:text-xl tracking-wide capitalize`}>Welcome! Find your lodge.</h1>
+      <h1 className={`font-bold pb-4 sm:text-xl tracking-wide capitalize`}>Welcome! Find your lodge.</h1>
       <div className="">
 
         <Card className="sm:w-[230px]  flex sm:flex-col w-full sm:h-64 h-32">
