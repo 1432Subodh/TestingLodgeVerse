@@ -16,7 +16,7 @@ import {
 function page() {
     return (
         <div className='pt-16 pb-4 sm:px-10 px-5 min-h-screen w-full flex gap-4 sm:flex-row flex-col'>
-            <div className='sm:w-[45%] h-full flex flex-col gap-8'>
+            <div className='sm:w-[45%] h-full flex flex-col gap-4'>
                 <Image src={'/img/placeholder.svg'} alt='' width={0} height={0} className='opacity-60 w-full sm:h-[75vh] h-[50vh] rounded-md object-cover  ' />
                 <div className='flex gap-3 justify-center'>
                     <Image src={'/img/placeholder.svg'} alt='' width={0} height={0} className='opacity-60 w-28 h-20 border-2 border-primary overflow-hidden rounded-md object-cover' />
