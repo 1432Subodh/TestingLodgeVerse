@@ -8,6 +8,7 @@ import Image from "next/image"
 import { IndianRupee } from "lucide-react"
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 interface CardsProps {
     message: string;
@@ -22,6 +23,7 @@ const LodgeCard: React.FC<CardsProps> = ({ message }) => {
 
         return setLoading(false);
     }, [])
+
 
 
     return (
@@ -63,7 +65,9 @@ const LodgeCard: React.FC<CardsProps> = ({ message }) => {
                                     <IndianRupee className="w-3.5 h-3.5" />
                                     <span>/Room</span>
                                 </p>
-                                <button className="text-sm font-semibold text-white bg-primary p-2 rounded-md">View More</button>
+                                <Link href={'/view/af'}>
+                                    <button className="text-sm font-semibold text-white bg-primary p-2 rounded-md">View More</button>
+                                </Link>
                             </div>
                         </CardContent>
                     </Card>
