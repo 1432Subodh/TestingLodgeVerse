@@ -9,7 +9,10 @@ export default function RootLayout({
   return (
     <>
         <Sidebar/>
+        <div className="pt-16 sm:px-10 px-4 sm:pl-[285px] pb-4">
+
         {children}
+        </div>
     </>
   );
 }
