@@ -14,7 +14,7 @@ interface CardsProps {
     message: string;
 }
 
-const LodgeCard: React.FC<CardsProps> = ({ message }) => {
+const LodgeCard = () => {
 
     const [loading, setLoading] = useState(true)
 
