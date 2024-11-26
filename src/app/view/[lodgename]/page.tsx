@@ -107,7 +107,7 @@ const Page = () => {
                     </h1>
 
 
-                    <button className='text-xs flex transition-all font-semibold items-center gap-1 rounded-md bg-card px-2 py-1.5 hover:opacity-75'>
+                    <button className='text-xs flex transition-all font-semibold items-center gap-1 dark:border-none border rounded-md bg-card px-2 py-1.5 hover:opacity-75'>
                         <Link href={data?.GoogleMapsURL || '/'} target="_blank">View in Map</Link>
                         <span><ExternalLinkIcon width={12} height={12} /></span>
                     </button>
