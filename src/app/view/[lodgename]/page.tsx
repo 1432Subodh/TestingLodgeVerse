@@ -15,43 +15,43 @@ import Link from "next/link";
 const Page = () => {
     const [data, setData] = useState<DataType | null>(null);
     const path = useParams<{ lodgename: string }>();
-    const [imageShow, setImageShow] = useState<string|null>(null)
+    const [imageShow, setImageShow] = useState<string | null>(null)
     const fetchData = async () => {
-            try {
-                if (!path.lodgename) {
-                    //console.error("No lodge name provided in URL.");
-                    return;
-                }
-
-                const lodgeid = path.lodgename;
-                //console.log("Fetching data for lodge:", lodgeid);
-
-                const docRef = doc(db, "LodgeData", lodgeid);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    //console.log(data);
-                    setData(data as DataType);
-                    setImageShow(data?.LodgeThumbnail?.[0])
-                } else {
-                    //console.log("No such document!");
-                }
-            } catch (err) {
-                //console.error("Error fetching lodge data:", err);
+        try {
+            if (!path.lodgename) {
+                //console.error("No lodge name provided in URL.");
+                return;
             }
-            
-        };
+
+            const lodgeid = path.lodgename;
+            //console.log("Fetching data for lodge:", lodgeid);
+
+            const docRef = doc(db, "LodgeData", lodgeid);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                //console.log(data);
+                setData(data as DataType);
+                setImageShow(data?.LodgeThumbnail?.[0])
+            } else {
+                //console.log("No such document!");
+            }
+        } catch (err) {
+            //console.error("Error fetching lodge data:", err);
+        }
+
+    };
     useEffect(() => {
-        
+
 
         fetchData();
     }, [path.lodgename]);
-    
-    const handleImage =(index:number, ele:string)=>{
+
+    const handleImage = (index: number, ele: string) => {
         setImageShow(ele)
         //console.log(imageShow)
-        
+
     }
 
 
@@ -61,7 +61,7 @@ const Page = () => {
                 {/* <Image src={data?.LodgeThumbnail} alt="" /> */}
                 {
                     data ? <Image
-                        src={imageShow ? imageShow: data?.LodgeThumbnail?.[0] || "/img/placeholder-image.jpg"}
+                        src={imageShow ? imageShow : data?.LodgeThumbnail?.[0] || "/img/placeholder-image.jpg"}
                         alt={data?.LodgeName || "Lodge Thumbnail"}
                         width={230}
                         height={128}
@@ -81,13 +81,13 @@ const Page = () => {
                         data?.LodgeThumbnail?.map((ele, index) => (
 
                             <Image
-                                onClick={()=>handleImage(index, ele)}
+                                onClick={() => handleImage(index, ele)}
                                 key={index}
                                 src={ele || "/img/placeholder-image.jpg"}
                                 alt={ele || "Lodge Thumbnail"}
                                 width={0} // Replace with the desired width
                                 height={0} // Replace with the desired height
-                                className={`opacity-60 w-28 h-20 overflow-hidden rounded-md object-cover cursor-pointer ${imageShow==ele && 'border-2 border-primary'}`}
+                                className={`opacity-60 w-28 h-20 overflow-hidden rounded-md object-cover cursor-pointer ${imageShow == ele && 'border-2 border-primary'}`}
                             />
 
                         ))
@@ -108,7 +108,7 @@ const Page = () => {
 
 
                     <button className='text-xs flex transition-all font-semibold items-center gap-1 rounded-md bg-card px-2 py-1.5 hover:opacity-75'>
-                        <Link href={data?.GoogleMapsURL || '/'}>View in Map</Link>
+                        <Link href={data?.GoogleMapsURL || '/'} target="_blank">View in Map</Link>
                         <span><ExternalLinkIcon width={12} height={12} /></span>
                     </button>
                 </div>
@@ -118,64 +118,34 @@ const Page = () => {
                 }</h3>
                 <p className='text-xs tracking-wider font-light'>Category</p>
                 <h3 className='font-semibold text-normal text-sm pb-5 border-b'>
-                {
-                            data ? data?.Category : 'Loading...'
-                        }
+                    {
+                        data ? data?.Category : 'Loading...'
+                    }
                 </h3>
 
 
                 <div className='flex justify-center gap-3 w-full [&>*]:rounded-sm [&>*]:p-2 mt-3 pb-4'>
                     <Card className='w-[50%] capitalize'>
-                        <h1 className='text-xl font-semibold tracking-wide'>Facilities</h1>
-                        <ol type='a' className='text-sm font-light tracking-wider list-decimal pl-6'>
-                            <li>wifi</li>
-                            <li>clean room</li>
-                            <li>at lest 10 X 10 room</li>
-                            <li>clean bathroom</li>
-                            <li>Balcony</li>
-                        </ol>
+                        <h1 className='text-xl font-semibold tracking-wide mb-2'>Facilities</h1>
+                        <p className='text-sm font-light'>
+                            {
+                                data?.Facilities
+                            }
+                        </p>
                     </Card>
                     <Card className=' w-[50%] '>
-                        <h1 className='text-xl font-semibold leading-5 tracking-wide'>Contact</h1>
-                        <p className='text-sm font-light'>Mahesh Kumar</p>
-                        <p className='text-sm font-light'>7046584686</p>
+                        <h1 className='text-xl font-semibold leading-5 tracking-wide mb-2'>Contact</h1>
+                        <p className='text-sm font-light'>Owner name : <span className="font-semibold">{data?.OwnerName}</span></p>
+                        <p className='text-sm font-light'>Owner Number : <span className="font-semibold">{data?.PhoneNumber}</span></p>
 
                     </Card>
                 </div>
 
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[100px]">Sr.No</TableHead>
-                            <TableHead>Catgory</TableHead>
-                            <TableHead>Size</TableHead>
-                            <TableHead className="text-right">Amount</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow>
-                            <TableCell className="font-medium">01</TableCell>
-                            <TableCell>Boys</TableCell>
-                            <TableCell>10 X 10</TableCell>
-                            <TableCell className="text-right">₹ 800.00/M</TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell className="font-medium">02</TableCell>
-                            <TableCell>Boys</TableCell>
-                            <TableCell>12 X 12</TableCell>
-                            <TableCell className="text-right">₹ 1200.00/M</TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell className="font-medium">03</TableCell>
-                            <TableCell>Family</TableCell>
-                            <TableCell className='sm:pl-7'>-</TableCell>
-                            <TableCell className="text-right">₹ 5200.00/M</TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
+
                 <div className='flex flex-row-reverse my-3 sm:mt-32'>
                     <button className=''>Add To Favorite</button>
                 </div>
+                {/* <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d29275.588628841175!2d85.3301032!3d23.9883788!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f49ea8c4921339%3A0x6b6e6a22ea351bc6!2sMunni%20Lodge!5e1!3m2!1sen!2sin!4v1732627441413!5m2!1sen!2sin" width="600" height="450"   loading="lazy" ></iframe> */}
 
             </div>
         </div>

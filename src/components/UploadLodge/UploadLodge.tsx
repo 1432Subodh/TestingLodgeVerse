@@ -1,14 +1,14 @@
 'use client'
 
-import React, { FormEvent, useState } from 'react'
-import { Separator } from "@/components/ui/separator"
-import { CardContent } from '@/components/ui/card'
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { addDoc, collection } from "firebase/firestore"
-import { db } from "@/config/FirebaseConfig"
-import { supabase } from "@/config/SupabaseConfig"
+import React, { FormEvent, useState } from 'react';
+import { Separator } from "@/components/ui/separator";
+import { CardContent } from '@/components/ui/card';
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "@/config/FirebaseConfig";
+import { supabase } from "@/config/SupabaseConfig";
 
 function UploadLodge() {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,6 +53,7 @@ function UploadLodge() {
         const Size = (form.elements.namedItem("size") as HTMLInputElement)?.value || "N/A";
         const Category = (form.elements.namedItem("category") as HTMLInputElement)?.value || "Uncategorized";
         const GoogleMapsURL = (form.elements.namedItem("googleMapsUrl") as HTMLInputElement)?.value || "";
+        const KeyPlaces = (form.elements.namedItem("keyPlaces") as HTMLTextAreaElement)?.value || ""; // New Key Places Field
 
         // Handle file uploads and URLs
         const fileInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="file"]'));
@@ -96,8 +97,9 @@ function UploadLodge() {
             Rent,
             Size,
             Category,
-            GoogleMapsURL, // Include Google Maps URL
-            LodgeThumbnail, // Store file URLs and uploaded file paths
+            GoogleMapsURL,
+            KeyPlaces, // Include Key Places
+            LodgeThumbnail,
         };
 
         try {
@@ -136,6 +138,13 @@ function UploadLodge() {
                 <div className="grid gap-3">
                     <div className="font-semibold">Facilities & Amenities</div>
                     <Textarea id="facilities" placeholder="Enter facilities" required />
+                </div>
+                <Separator className="my-4" />
+
+                {/* Key Places Section */}
+                <div className="grid gap-3">
+                    <div className="font-semibold">Key Places</div>
+                    <Textarea id="keyPlaces" placeholder="Nearby landmarks, markets, or points of interest" required />
                 </div>
                 <Separator className="my-4" />
 

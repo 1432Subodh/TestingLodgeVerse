@@ -24,6 +24,7 @@ export type DataType = {
   Size?: string;
   Category ?: string;
   GoogleMapsURL ?: string;  
+  KeyPlaces ?: string;  
 };
 
 const Page: React.FC = () => {
@@ -61,13 +62,15 @@ const Page: React.FC = () => {
         <div className="sm:grid sm:grid-cols-4 sm:gap-5 flex flex-col gap-3">
           {lodges.map((lodge) => (
             <Card key={lodge.id} className="sm:w-[230px] flex sm:flex-col w-full sm:h-64 h-32">
-              <div className="sm:w-full w-44 sm:h-32 h-full">
+              <div className="sm:w-full w-44 sm:h-32 h-full relative">
+                {/* <Badge className="absolute right-4 top-1 ">{lodge?.Category}</Badge> */}
+                <span className={`absolute right-4 top-1 text-xs px-2 py-0.5 cursor-default rounded-sm ${lodge?.Category=='Boys'? 'hover:bg-[#49a411c3] bg-green-700': lodge?.Category=='Girls'? 'bg-pink-600 hover:bg-[#ab107ac3]': 'hover:bg-yellow-600 bg-[#d99a2eb8]'}`}>{lodge?.Category}</span>
                 <Image
                   src={lodge.LodgeThumbnail?.[0] || "/placeholder-image.jpg"} 
                   alt={lodge.LodgeName || "Lodge Thumbnail"}
                   width={230}
                   height={128}
-                  className="sm:w-full opacity-55 w-44 sm:h-32 h-full object-cover sm:rounded-tr-md rounded-bl-md sm:rounded-bl-none sm:rounded-tl-md rounded-tl-md"
+                  className="sm:w-full w-44 sm:h-32 h-full object-cover sm:rounded-tr-md rounded-bl-md sm:rounded-bl-none sm:rounded-tl-md rounded-tl-md"
                 />
               </div>
 
