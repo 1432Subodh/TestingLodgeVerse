@@ -23,7 +23,7 @@ export type DataType = {
   Rent?: string;
   Size?: string;
   Category ?: string;
-  
+  GoogleMapsURL ?: string;  
 };
 
 const Page: React.FC = () => {

@@ -11,7 +11,7 @@ import { db } from "@/config/FirebaseConfig"
 import { supabase } from "@/config/SupabaseConfig"
 
 function UploadLodge() {
-    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const generateRandomFileName = (originalName: string, prefix: string): string => {
         const extension = originalName.split('.').pop() || '';
@@ -20,19 +20,18 @@ function UploadLodge() {
 
     const handleFileUpload = async (file: File, filePathPrefix: string): Promise<string | null> => {
         try {
-            // Generate a random unique filename
             const randomFileName = generateRandomFileName(file.name, filePathPrefix);
             const { data, error } = await supabase.storage.from('image').upload(randomFileName, file);
 
             if (error) {
-                //console.error('File upload error:', error.message);
+                console.error('File upload error:', error.message);
                 return null;
             }
             return data?.path
                 ? `https://qwymhkktvbieizekmchi.supabase.co/storage/v1/object/public/image/${data.path}`
                 : null;
         } catch (err) {
-            //console.error('Unexpected file upload error:', err);
+            console.error('Unexpected file upload error:', err);
             return null;
         }
     };
@@ -53,8 +52,9 @@ function UploadLodge() {
         const Rent = (form.elements.namedItem("rent") as HTMLInputElement).value;
         const Size = (form.elements.namedItem("size") as HTMLInputElement)?.value || "N/A";
         const Category = (form.elements.namedItem("category") as HTMLInputElement)?.value || "Uncategorized";
+        const GoogleMapsURL = (form.elements.namedItem("googleMapsUrl") as HTMLInputElement)?.value || "";
 
-        // Handle file uploads
+        // Handle file uploads and URLs
         const fileInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="file"]'));
         const uploadedFilePaths = await Promise.all(
             fileInputs.map(async (fileInput, index) => {
@@ -67,12 +67,20 @@ function UploadLodge() {
             })
         );
 
-        // Filter out any null values
-        const LodgeThumbnail = uploadedFilePaths.filter((path) => path !== null);
+        // Collect file URLs
+        const fileUrls = Array.from(form.querySelectorAll<HTMLInputElement>('input[name^="fileUrl"]'))
+            .map((input) => input.value)
+            .filter((url) => url);
 
-        // Ensure at least one image is uploaded
+        // Combine uploaded files and URLs
+        const LodgeThumbnail = [
+            ...uploadedFilePaths.filter((path) => path !== null),
+            ...fileUrls,
+        ];
+
+        // Ensure at least one image is provided
         if (LodgeThumbnail.length === 0) {
-            //console.error("No images were uploaded. Submission canceled.");
+            console.error("No images or URLs were provided. Submission canceled.");
             setIsSubmitting(false);
             return;
         }
@@ -88,15 +96,16 @@ function UploadLodge() {
             Rent,
             Size,
             Category,
-            LodgeThumbnail, // Store random file names
+            GoogleMapsURL, // Include Google Maps URL
+            LodgeThumbnail, // Store file URLs and uploaded file paths
         };
 
         try {
             const docRef = await addDoc(collection(db, "LodgeData"), LodgeData);
-            //console.log("Lodge successfully added with ID:", docRef.id);
+            console.log("Lodge successfully added with ID:", docRef.id);
             form.reset();
         } catch (error) {
-            //console.error("Error adding lodge data to Firestore:", error);
+            console.error("Error adding lodge data to Firestore:", error);
         } finally {
             setIsSubmitting(false);
         }
@@ -108,14 +117,9 @@ function UploadLodge() {
                 {/* Lodge Details */}
                 <div className="grid gap-3">
                     <div className="font-semibold">Lodge Details</div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-muted-foreground text-sm">Lodge Name</span>
-                        <Input id="lodgeName" placeholder="Enter lodge name" required />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-muted-foreground text-sm">Address</span>
-                        <Textarea id="address" placeholder="Enter address" required />
-                    </div>
+                    <Input id="lodgeName" placeholder="Enter lodge name" required />
+                    <Textarea id="address" placeholder="Enter address" required />
+                    <Input id="googleMapsUrl" placeholder="Google Maps URL" required />
                 </div>
                 <Separator className="my-4" />
 
@@ -163,8 +167,6 @@ function UploadLodge() {
                             <SelectItem value="Girls">Girls</SelectItem>
                             <SelectItem value="Boys">Boys</SelectItem>
                             <SelectItem value="Family">Family</SelectItem>
-                            <SelectItem value="Girls & Family">Girls & Family</SelectItem>
-                            <SelectItem value="Boys & Family">Boys & Family</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -177,13 +179,26 @@ function UploadLodge() {
                         <div key={index}>
                             <label className="flex items-center gap-1">
                                 File {index + 1}:
-                                <Input type="file" accept="image/*" required />
+                                <Input type="file" accept="image/*" />
                             </label>
                         </div>
                     ))}
                 </div>
 
-                <div className="flex justify-end">
+                {/* File URLs */}
+                <div className="grid gap-3 mt-4">
+                    <div className="font-semibold">Or Provide Image URLs</div>
+                    {Array.from({ length: 3 }).map((_, index) => (
+                        <div key={index}>
+                            <label className="flex items-center gap-1">
+                                URL {index + 1}:
+                                <Input name={`fileUrl_${index}`} placeholder="Enter file URL" />
+                            </label>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="flex justify-end mt-4">
                     <button
                         type="submit"
                         className="bg-background hover:bg-accent px-3 py-1.5 rounded-md"

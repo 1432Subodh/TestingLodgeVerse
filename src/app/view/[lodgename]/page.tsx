@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Skeleton } from "@/components/ui/skeleton";
 import { DataType } from "@/app/lodge/page";
+import Link from "next/link";
 
 
 const Page = () => {
@@ -107,7 +108,7 @@ const Page = () => {
 
 
                     <button className='text-xs flex transition-all font-semibold items-center gap-1 rounded-md bg-card px-2 py-1.5 hover:opacity-75'>
-                        <span>View in Map</span>
+                        <Link href={data?.GoogleMapsURL || '/'}>View in Map</Link>
                         <span><ExternalLinkIcon width={12} height={12} /></span>
                     </button>
                 </div>

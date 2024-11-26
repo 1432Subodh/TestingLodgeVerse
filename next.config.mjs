@@ -7,6 +7,16 @@ const nextConfig = {
           hostname: 'qwymhkktvbieizekmchi.supabase.co',
           pathname: '/storage/v1/object/public/image/**', // Adjust pathname if needed
         },
+        {
+          protocol: 'https',
+          hostname: 'encrypted-tbn0.gstatic.com',
+          // pathname: '/storage/v1/object/public/image/**', // Adjust pathname if needed
+        },
+        {
+          protocol: 'https',
+          hostname: 'lh5.googleusercontent.com',
+          // pathname: '/storage/v1/object/public/image/**', // Adjust pathname if needed
+        },
       ],
     },
   };
