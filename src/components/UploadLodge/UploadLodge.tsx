@@ -1,175 +1,200 @@
 'use client'
-import { Separator } from "@/components/ui/separator"
+
 import React, { FormEvent, useState } from 'react'
-import { CardContent } from '../ui/card'
-import { Input } from "../ui/input"
-import { Textarea } from "../ui/textarea"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+import { CardContent } from '@/components/ui/card'
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { addDoc, collection } from "firebase/firestore"
 import { db } from "@/config/FirebaseConfig"
 import { supabase } from "@/config/SupabaseConfig"
 
-
 function UploadLodge() {
-    const [filename, setfilename] = useState<string | null>(null)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const generateRandomFileName = (originalName: string, prefix: string): string => {
+        const extension = originalName.split('.').pop() || '';
+        return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${extension}`;
+    };
+
+    const handleFileUpload = async (file: File, filePathPrefix: string): Promise<string | null> => {
+        try {
+            // Generate a random unique filename
+            const randomFileName = generateRandomFileName(file.name, filePathPrefix);
+            const { data, error } = await supabase.storage.from('image').upload(randomFileName, file);
+
+            if (error) {
+                //console.error('File upload error:', error.message);
+                return null;
+            }
+            return data?.path
+                ? `https://qwymhkktvbieizekmchi.supabase.co/storage/v1/object/public/image/${data.path}`
+                : null;
+        } catch (err) {
+            //console.error('Unexpected file upload error:', err);
+            return null;
+        }
+    };
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        console.log(e)
+        e.preventDefault();
+        setIsSubmitting(true);
+
         const form = e.target as HTMLFormElement;
-        let LodgeName = (form.elements[0] as HTMLInputElement).value;
-        let Address = (form.elements[1] as HTMLInputElement).value;
-        let OwnerName = (form.elements[2] as HTMLInputElement).value;
-        let Email = (form.elements[3] as HTMLInputElement).value;
-        let PhoneNumber = (form.elements[4] as HTMLInputElement).value;
-        let Facilities = (form.elements[5] as HTMLInputElement).value;
-        let Rent = (form.elements[6] as HTMLInputElement).value;
-        let Size = (form.elements[8] as HTMLInputElement).value;
-        // let file = (form.elements[9] as HTMLInputElement)
-        //File of Supabase
 
-        let fileInput = form.elements[9] as HTMLInputElement;
-        let file; // Safely access the first file
+        // Extract form data
+        const LodgeName = (form.elements.namedItem("lodgeName") as HTMLInputElement).value;
+        const Address = (form.elements.namedItem("address") as HTMLTextAreaElement).value;
+        const OwnerName = (form.elements.namedItem("ownerName") as HTMLInputElement).value;
+        const Email = (form.elements.namedItem("email") as HTMLInputElement).value;
+        const PhoneNumber = (form.elements.namedItem("phoneNumber") as HTMLInputElement).value;
+        const Facilities = (form.elements.namedItem("facilities") as HTMLTextAreaElement).value;
+        const Rent = (form.elements.namedItem("rent") as HTMLInputElement).value;
+        const Size = (form.elements.namedItem("size") as HTMLInputElement)?.value || "N/A";
+        const Category = (form.elements.namedItem("category") as HTMLInputElement)?.value || "Uncategorized";
 
-        if (fileInput.files?.[0]) {
-            file = fileInput.files?.[0]
-            console.log("Selected file:", file?.name);
+        // Handle file uploads
+        const fileInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="file"]'));
+        const uploadedFilePaths = await Promise.all(
+            fileInputs.map(async (fileInput, index) => {
+                const file = fileInput.files?.[0];
+                if (file) {
+                    const filePathPrefix = `LodgeImage/Image_${index + 1}`;
+                    return await handleFileUpload(file, filePathPrefix);
+                }
+                return null;
+            })
+        );
 
+        // Filter out any null values
+        const LodgeThumbnail = uploadedFilePaths.filter((path) => path !== null);
+
+        // Ensure at least one image is uploaded
+        if (LodgeThumbnail.length === 0) {
+            //console.error("No images were uploaded. Submission canceled.");
+            setIsSubmitting(false);
+            return;
         }
-        const fileName = 'LodgeImage/' + file?.name
-        // console.log(filename)
-        setfilename(fileName)
-        const { data, error } = await supabase
-            .storage.from('image')
-            .upload(fileName, file as File)
 
-
-
-
-
-
-
+        // Prepare lodge data for Firestore
         const LodgeData = {
-            LodgeName, Address, OwnerName, Email, PhoneNumber, Facilities, Rent, Size,
-            LodgeThumbnail: `https://qwymhkktvbieizekmchi.supabase.co/storage/v1/object/public/image/${fileName}`
+            LodgeName,
+            Address,
+            OwnerName,
+            Email,
+            PhoneNumber,
+            Facilities,
+            Rent,
+            Size,
+            Category,
+            LodgeThumbnail, // Store random file names
+        };
+
+        try {
+            const docRef = await addDoc(collection(db, "LodgeData"), LodgeData);
+            //console.log("Lodge successfully added with ID:", docRef.id);
+            form.reset();
+        } catch (error) {
+            //console.error("Error adding lodge data to Firestore:", error);
+        } finally {
+            setIsSubmitting(false);
         }
-        console.log(LodgeData)
-        if (data) {
-            console.log(data)
-            try {
-                const docRef = await addDoc(collection(db, "LodgeData"), LodgeData);
-                console.log("Document written with ID: ", docRef.id);
-            } catch (e) {
-                console.error("Error adding document: ", e);
-            }
-        }else{
-            console.log(error)
-        }
-
-
-    }
-
-
+    };
 
     return (
-        <form action="" method="post" onSubmit={handleSubmit}>
-            <p>{filename} here</p>
+        <form onSubmit={handleSubmit}>
             <CardContent className="p-6 text-sm">
-                <div className="grid gap-3 ">
-                    <div className="font-semibold">Lodge Details</div>
-                    <ul className="grid gap-3">
-                        <li className="flex flex-col gap-1">
-                            <span className="text-muted-foreground text-sm">Lodge name</span>
-                            <Input placeholder="Enter lodge name here." required id="lodgeName" />
-                        </li>
-                        <li className="flex flex-col gap-1">
-                            <span className="text-muted-foreground text-sm">Address</span>
-                            <Textarea placeholder="Type address here." required id="address" />
-                        </li>
-                    </ul>
-                    <Separator className="my-2" />
-                    <div className="grid gap-3">
-                        <div className="font-semibold">Owner Contact Details</div>
-                        <dl className="grid gap-3">
-                            <div className="flex items-center justify-between">
-                                <dt className="text-muted-foreground">Owner Name</dt>
-                                <Input className="w-56" placeholder="Enter Owner Name" id="ownerName" />
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <dt className="text-muted-foreground">Email</dt>
-                                <Input className="w-56" placeholder="Enter Owner Email" type="email" id="email" />
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <dt className="text-muted-foreground">Phone</dt>
-                                <Input className="w-56" placeholder="Enter Owner Phone Number" type="number" id="phoneNumber" />
-                            </div>
-                        </dl>
-                    </div>
-                </div>
-
-                <Separator className="my-4" />
+                {/* Lodge Details */}
                 <div className="grid gap-3">
-
-                    <div className="space-y-4">
-                        <div className="font-semibold">Facilities & Amenities</div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-muted-foreground text-sm">Address</span>
-                            <Textarea placeholder="Type address here." required id="facilities" />
-                        </div>
+                    <div className="font-semibold">Lodge Details</div>
+                    <div className="flex flex-col gap-1">
+                        <span className="text-muted-foreground text-sm">Lodge Name</span>
+                        <Input id="lodgeName" placeholder="Enter lodge name" required />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <span className="text-muted-foreground text-sm">Address</span>
+                        <Textarea id="address" placeholder="Enter address" required />
                     </div>
                 </div>
                 <Separator className="my-4" />
+
+                {/* Owner Details */}
+                <div className="grid gap-3">
+                    <div className="font-semibold">Owner Contact Details</div>
+                    <Input id="ownerName" placeholder="Owner Name" required />
+                    <Input id="email" placeholder="Owner Email" type="email" required />
+                    <Input id="phoneNumber" placeholder="Owner Phone Number" type="number" required />
+                </div>
+                <Separator className="my-4" />
+
+                {/* Facilities */}
+                <div className="grid gap-3">
+                    <div className="font-semibold">Facilities & Amenities</div>
+                    <Textarea id="facilities" placeholder="Enter facilities" required />
+                </div>
+                <Separator className="my-4" />
+
+                {/* Room Details */}
                 <div className="grid gap-3">
                     <div className="font-semibold">Room Details</div>
-                    <dl className="grid gap-3">
-                        <div className="flex items-center justify-between">
-                            <dt className="flex items-center gap-1 text-muted-foreground">
-                                Rent & Price
-                            </dt>
-                            <dd>
-                                <Input className="w-40" type="number" placeholder="Rent & Price" id="rent" />
-                            </dd>
-                        </div>
-                    </dl>
-                    <dl className="grid gap-3">
-                        <div className="flex items-center justify-between">
-                            <dt className="flex items-center gap-1 text-muted-foreground">
-                                Room Size
-                            </dt>
-                            <dd>
-                                <Select>
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Size" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Small">10X10 (Small)</SelectItem>
-                                        <SelectItem value="Big">12X12 (Big)</SelectItem>
-                                        <SelectItem value="Large">Large</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </dd>
-                        </div>
-                    </dl>
+                    <Input id="rent" placeholder="Rent" type="number" required />
+                    <Select name="size">
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select size" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Small">10x10 (Small)</SelectItem>
+                            <SelectItem value="Big">12x12 (Big)</SelectItem>
+                            <SelectItem value="Large">Large</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
                 <Separator className="my-4" />
-                <div className="space-y-4">
-                    <div className="font-semibold">Uplaod Image</div>
 
-                    <Input type="file" className="w-52" accept="image/*" id="file" />
+                {/* Category Selector */}
+                <div className="grid gap-3">
+                    <div className="font-semibold">Category</div>
+                    <Select name="category" required>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Girls">Girls</SelectItem>
+                            <SelectItem value="Boys">Boys</SelectItem>
+                            <SelectItem value="Family">Family</SelectItem>
+                            <SelectItem value="Girls & Family">Girls & Family</SelectItem>
+                            <SelectItem value="Boys & Family">Boys & Family</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
-                <div className="flex flex-row-reverse">
+                <Separator className="my-4" />
 
-                    <input type="submit" className="bg-background shadow-sm hover:bg-accent cursor-pointer hover:text-accent-foreground rounded-md px-3 py-1.5 " id="submit" />
+                {/* File Upload */}
+                <div className="grid gap-3">
+                    <div className="font-semibold">Upload Images</div>
+                    {Array.from({ length: 3 }).map((_, index) => (
+                        <div key={index}>
+                            <label className="flex items-center gap-1">
+                                File {index + 1}:
+                                <Input type="file" accept="image/*" required />
+                            </label>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="flex justify-end">
+                    <button
+                        type="submit"
+                        className="bg-background hover:bg-accent px-3 py-1.5 rounded-md"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? "Submitting..." : "Submit"}
+                    </button>
                 </div>
             </CardContent>
         </form>
-    )
+    );
 }
 
-export default UploadLodge
+export default UploadLodge;

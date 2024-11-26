@@ -11,17 +11,19 @@ import {
 } from "@/components/ui/card";
 import { IndianRupee } from "lucide-react";
 
-type DataType = {
+export type DataType = {
   id: string;
   Address?: string;
   Email?: string;
   Facilities?: string;
   LodgeName?: string;
-  LodgeThumbnail?: string;
+  LodgeThumbnail?: string[];
   OwnerName?: string;
   PhoneNumber?: string;
   Rent?: string;
   Size?: string;
+  Category ?: string;
+  
 };
 
 const Page: React.FC = () => {
@@ -37,14 +39,17 @@ const Page: React.FC = () => {
           ...doc.data(),
         }));
         setLodges(fetchedLodges);
-        console.log("Fetched data:", fetchedLodges);
+        //console.log("Fetched data:", fetchedLodges);
       } catch (error) {
-        console.error("Error fetching collection data:", error);
+        //console.error("Error fetching collection data:", error);
       }
     };
 
     fetchLodges();
   }, []);
+
+
+  
 
   return (
     <div>
@@ -58,7 +63,7 @@ const Page: React.FC = () => {
             <Card key={lodge.id} className="sm:w-[230px] flex sm:flex-col w-full sm:h-64 h-32">
               <div className="sm:w-full w-44 sm:h-32 h-full">
                 <Image
-                  src={lodge.LodgeThumbnail || "/placeholder-image.jpg"} 
+                  src={lodge.LodgeThumbnail?.[0] || "/placeholder-image.jpg"} 
                   alt={lodge.LodgeName || "Lodge Thumbnail"}
                   width={230}
                   height={128}
