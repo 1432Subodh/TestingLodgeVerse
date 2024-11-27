@@ -23,7 +23,7 @@ function Navbar() {
               className="dark:invert"
               alt="Lodge UI Logo"
             />
-            <h1 className="font-bold text-normal">lodge/ui</h1>
+            <h1 className="font-bold text-normal">lodgeVerse</h1>
           </div>
         </Link>
         <Navigation />
