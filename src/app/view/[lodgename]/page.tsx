@@ -116,7 +116,6 @@ const Page = () => {
                 </div>
 
                 {/* Room Details */}
-                {/* Room Details */}
                 <div className="w-full border-t pt-4 mt-4">
                     <h2 className="text-xl font-semibold mb-4">Room Details</h2>
                     <ul className="space-y-3">
