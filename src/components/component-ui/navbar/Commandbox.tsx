@@ -32,11 +32,12 @@ export function Commandbox() {
   const handleInput = (event: React.KeyboardEvent<HTMLInputElement>) => {
     const target = event.target as HTMLInputElement;
     const value = target.value; // Access the input value
+    // console.log(target)
     setInputValue(value);
+    // if()
   };
   return (
     <Command className="rounded-lg border shadow-md md:min-w-[450px]">
-
         <CommandInput placeholder="Type a command or search..." onKeyUp={handleInput} />
       <CommandList>
         {/* <CommandEmpty>No results found. <br /> <span className="text-xs font-light">Click on Search from more result.</span></CommandEmpty> */}

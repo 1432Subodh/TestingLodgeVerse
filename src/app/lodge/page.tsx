@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { db } from "@/config/FirebaseConfig";
-import { collection, getDocs, QuerySnapshot, DocumentData } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { IndianRupee } from "lucide-react";
+import { fetchLodges } from "../../../HandleRequest/GetData";
 
 // Sample Loader Component
 const Loader = () => (
@@ -34,26 +33,28 @@ export type DataType = {
 const Page: React.FC = () => {
   const [lodges, setLodges] = useState<DataType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [imageLoading, setImageLoading] = useState<Record<string, boolean>>({});
 
+  
+  const fetchData = async()=>{
+    // setLoading(true)
+    let data:any = await fetchLodges()
+    // console.log(data)
+    setLodges(data)
+    setLoading(false)
+  }
   useEffect(() => {
-    const fetchLodges = async () => {
-      try {
-        setLoading(true); // Show loader
-        const querySnapshot: QuerySnapshot<DocumentData> = await getDocs(collection(db, "LodgeData"));
-        const fetchedLodges: DataType[] = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setLodges(fetchedLodges);
-      } catch (error) {
-        console.error("Error fetching lodges:", error);
-      } finally {
-        setLoading(false); // Hide loader
-      }
-    };
-
-    fetchLodges();
+    fetchData()
+    
   }, []);
+
+  const handleImageLoadStart = (id: string) => {
+    setImageLoading((prev) => ({ ...prev, [id]: true }));
+  };
+
+  const handleImageLoadComplete = (id: string) => {
+    setImageLoading((prev) => ({ ...prev, [id]: false }));
+  };
 
   if (loading) return <Loader />;
 
@@ -71,23 +72,34 @@ const Page: React.FC = () => {
               className="sm:w-[230px] flex sm:flex-col w-full sm:h-64 h-32"
             >
               <div className="sm:w-full w-44 sm:h-32 h-full relative">
+                {/* Category Label */}
                 <span
-                  className={`absolute right-4 top-1 text-xs px-2 py-0.5 cursor-default rounded-sm ${
-                    lodge.Category === "Boys"
+                  className={`absolute right-4 top-1 text-xs px-2 py-0.5 cursor-default rounded-sm ${lodge.Category === "Boys"
                       ? "hover:bg-[#49a411c3] bg-green-700"
                       : lodge.Category === "Girls"
-                      ? "bg-pink-600 hover:bg-[#ab107ac3]"
-                      : "hover:bg-yellow-600 bg-[#d99a2eb8]"
-                  }`}
+                        ? "bg-pink-600 hover:bg-[#ab107ac3]"
+                        : "hover:bg-yellow-600 bg-[#d99a2eb8]"
+                    }`}
                 >
                   {lodge?.Category || "Uncategorized"}
                 </span>
+
+                {/* Show spinner while the image is loading */}
+                {imageLoading[lodge.id] && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                    <div className="loader border-t-4 border-primary rounded-full w-8 h-8 animate-spin"></div>
+                  </div>
+                )}
+
                 <Image
                   src={lodge.LodgeThumbnail?.[0] || "/placeholder-image.jpg"}
                   alt={lodge.LodgeName || "Lodge Thumbnail"}
                   width={230}
                   height={128}
+                  loading="lazy"
                   className="sm:w-full w-44 sm:h-32 h-full object-cover sm:rounded-t-md rounded-md"
+                  onLoadingComplete={() => handleImageLoadComplete(lodge.id)}
+                  onLoadStart={() => handleImageLoadStart(lodge.id)}
                 />
               </div>
 

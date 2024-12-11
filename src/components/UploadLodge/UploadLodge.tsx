@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { FormEvent, useState } from 'react';
 import { Separator } from "@/components/ui/separator";
@@ -6,63 +6,44 @@ import { CardContent } from '@/components/ui/card';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "@/config/FirebaseConfig";
-import { supabase } from "@/config/SupabaseConfig";
+import toast, { Toaster } from 'react-hot-toast';
 
 function UploadLodge() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const generateRandomFileName = (originalName: string, prefix: string): string => {
-        const extension = originalName.split('.').pop() || '';
-        return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${extension}`;
-    };
-
-    const handleFileUpload = async (file: File, filePathPrefix: string): Promise<string | null> => {
-        try {
-            const randomFileName = generateRandomFileName(file.name, filePathPrefix);
-            const { data, error } = await supabase.storage.from('image').upload(randomFileName, file);
-
-            if (error) {
-                console.error('File upload error:', error.message);
-                return null;
-            }
-            return data?.path
-                ? `https://qwymhkktvbieizekmchi.supabase.co/storage/v1/object/public/image/${data.path}`
-                : null;
-        } catch (err) {
-            console.error('Unexpected file upload error:', err);
-            return null;
-        }
-    };
-
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setIsSubmitting(true);
 
         const form = e.target as HTMLFormElement;
 
         // Extract form data
-        const LodgeName = (form.elements.namedItem("lodgeName") as HTMLInputElement).value;
-        const Address = (form.elements.namedItem("address") as HTMLTextAreaElement).value;
-        const OwnerName = (form.elements.namedItem("ownerName") as HTMLInputElement).value;
-        const Email = (form.elements.namedItem("email") as HTMLInputElement).value;
-        const PhoneNumber = (form.elements.namedItem("phoneNumber") as HTMLInputElement).value;
-        const Facilities = (form.elements.namedItem("facilities") as HTMLTextAreaElement).value;
-        const Rent = (form.elements.namedItem("rent") as HTMLInputElement).value;
-        const Size = (form.elements.namedItem("size") as HTMLInputElement)?.value || "N/A";
-        const Category = (form.elements.namedItem("category") as HTMLInputElement)?.value || "Uncategorized";
-        const GoogleMapsURL = (form.elements.namedItem("googleMapsUrl") as HTMLInputElement)?.value || "";
-        const KeyPlaces = (form.elements.namedItem("keyPlaces") as HTMLTextAreaElement)?.value || ""; // New Key Places Field
+        const lodgeData = {
+            LodgeName: (form.elements.namedItem("lodgeName") as HTMLInputElement).value,
+            Address: (form.elements.namedItem("address") as HTMLTextAreaElement).value,
+            OwnerName: (form.elements.namedItem("ownerName") as HTMLInputElement).value,
+            Email: (form.elements.namedItem("email") as HTMLInputElement).value,
+            PhoneNumber: (form.elements.namedItem("phoneNumber") as HTMLInputElement).value,
+            Facilities: (form.elements.namedItem("facilities") as HTMLTextAreaElement).value,
+            Rent: (form.elements.namedItem("rent") as HTMLInputElement).value,
+            Size: (form.elements.namedItem("size") as HTMLInputElement)?.value || "N/A",
+            Category: (form.elements.namedItem("category") as HTMLInputElement)?.value || "Uncategorized",
+            GoogleMapsURL: (form.elements.namedItem("googleMapsUrl") as HTMLInputElement)?.value || "",
+            KeyPlaces: (form.elements.namedItem("keyPlaces") as HTMLTextAreaElement)?.value || "",
+        };
 
-        // Handle file uploads and URLs
+        // Prepare files for upload
         const fileInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="file"]'));
-        const uploadedFilePaths = await Promise.all(
+        const files = await Promise.all(
             fileInputs.map(async (fileInput, index) => {
                 const file = fileInput.files?.[0];
                 if (file) {
-                    const filePathPrefix = `LodgeImage/Image_${index + 1}`;
-                    return await handleFileUpload(file, filePathPrefix);
+                    const prefix = `LodgeImage/Image_${index + 1}`;
+                    const content = await file.arrayBuffer();
+                    return {
+                        name: file.name,
+                        content: Buffer.from(content).toString('base64'),
+                        prefix,
+                    };
                 }
                 return null;
             })
@@ -73,48 +54,49 @@ function UploadLodge() {
             .map((input) => input.value)
             .filter((url) => url);
 
-        // Combine uploaded files and URLs
-        const LodgeThumbnail = [
-            ...uploadedFilePaths.filter((path) => path !== null),
-            ...fileUrls,
-        ];
+        // Use toast.promise for handling async submission with feedback
+        await toast.promise(
+            new Promise(async (resolve, reject) => {
+                try {
+                    setIsSubmitting(true);
 
-        // Ensure at least one image is provided
-        if (LodgeThumbnail.length === 0) {
-            console.error("No images or URLs were provided. Submission canceled.");
-            setIsSubmitting(false);
-            return;
-        }
+                    const response = await fetch('/api/lodgedata', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            lodgeData,
+                            files: files.filter(Boolean),
+                            fileUrls,
+                        }),
+                    });
 
-        // Prepare lodge data for Firestore
-        const LodgeData = {
-            LodgeName,
-            Address,
-            OwnerName,
-            Email,
-            PhoneNumber,
-            Facilities,
-            Rent,
-            Size,
-            Category,
-            GoogleMapsURL,
-            KeyPlaces, // Include Key Places
-            LodgeThumbnail,
-        };
+                    const result = await response.json();
 
-        try {
-            const docRef = await addDoc(collection(db, "LodgeData"), LodgeData);
-            console.log("Lodge successfully added with ID:", docRef.id);
-            form.reset();
-        } catch (error) {
-            console.error("Error adding lodge data to Firestore:", error);
-        } finally {
-            setIsSubmitting(false);
-        }
+                    if (!response.ok) {
+                        reject(result.error || 'Failed to submit lodge data.');
+                    }
+
+                    form.reset(); // Reset the form on success
+                    resolve(result.id); // Resolve promise with success
+                } catch (error:any) {
+                    reject(error.message || 'Submission error.');
+                } finally {
+                    setIsSubmitting(false);
+                }
+            }),
+            {
+                loading: 'Submitting your lodge details...',
+                success: 'Lodge details submitted successfully! 🎉',
+                error: 'Failed to submit lodge details. Please try again. 😢',
+            }
+        );
     };
 
     return (
         <form onSubmit={handleSubmit}>
+            <Toaster /> {/* Add the Toaster component for displaying notifications */}
             <CardContent className="p-6 text-sm">
                 {/* Lodge Details */}
                 <div className="grid gap-3">

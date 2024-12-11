@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
@@ -14,6 +14,11 @@ const Page = () => {
     const path = useParams<{ lodgename: string }>();
     const [imageShow, setImageShow] = useState<string | null>(null);
     const [isImageLoading, setIsImageLoading] = useState<boolean>(true);
+    const [isMounted, setIsMounted] = useState(false); // Track client-side rendering
+
+    useEffect(() => {
+        setIsMounted(true); // Mark component as mounted
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -36,30 +41,40 @@ const Page = () => {
             }
         };
 
-        fetchData();
-    }, [path.lodgename]);
+        if (isMounted) fetchData();
+    }, [path.lodgename, isMounted]);
 
     const handleImageChange = (imageUrl: string) => {
         setIsImageLoading(true);
         setImageShow(imageUrl);
     };
 
+    // Prevent rendering on the server
+    if (!isMounted) return null;
+
     return (
         <div className="pt-16 pb-4 sm:px-10 px-5 min-h-screen w-full flex gap-4 sm:flex-row flex-col">
             {/* Left Section: Image Viewer */}
             <div className="sm:w-[45%] h-full flex flex-col gap-4">
-                {data ? (
-                    <Image
-                        src={imageShow || "/img/placeholder-image.jpg"}
-                        alt={data?.LodgeName || "Lodge Thumbnail"}
-                        width={600}
-                        height={400}
-                        className={`w-full sm:h-[75vh] h-[50vh] rounded-md object-cover transition-opacity ${isImageLoading ? "opacity-50" : "opacity-100"}`}
-                        onLoad={() => setIsImageLoading(false)}
-                    />
-                ) : (
-                    <Skeleton className="w-full sm:h-[75vh] h-[50vh] rounded-md" />
-                )}
+                <div className="relative">
+                    {isImageLoading && (
+                        <div className="absolute inset-0 flex justify-center items-center bg-black bg-opacity-25 rounded-md">
+                            <div className="spinner-border animate-spin inline-block w-10 h-10 border-4 rounded-full text-primary"></div>
+                        </div>
+                    )}
+                    {data ? (
+                        <Image
+                            src={imageShow || "/img/placeholder-image.jpg"}
+                            alt={data?.LodgeName || "Lodge Thumbnail"}
+                            width={600}
+                            height={400}
+                            className={`w-full sm:h-[75vh] h-[50vh] rounded-md object-cover transition-opacity ${isImageLoading ? "opacity-50" : "opacity-100"}`}
+                            onLoad={() => setIsImageLoading(false)}
+                        />
+                    ) : (
+                        <Skeleton className="w-full sm:h-[75vh] h-[50vh] rounded-md" />
+                    )}
+                </div>
 
                 <div className="flex gap-3 justify-center">
                     {data?.LodgeThumbnail?.map((thumbnail: string, index: number) => (
@@ -71,6 +86,7 @@ const Page = () => {
                             height={80}
                             className={`opacity-60 w-28 h-20 overflow-hidden rounded-md object-cover cursor-pointer ${imageShow === thumbnail && "border-2 border-primary"
                                 }`}
+                            
                             onClick={() => handleImageChange(thumbnail)}
                         />
                     ))}
@@ -143,7 +159,6 @@ const Page = () => {
                         </li>
                     </ul>
                 </div>
-
 
                 <div className="flex justify-center sm:mt-10 mt-5">
                     <button className="bg-primary hover:bg-accent text-white px-4 py-2 rounded-md">

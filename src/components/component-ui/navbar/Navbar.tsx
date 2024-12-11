@@ -7,7 +7,6 @@ import Searchbar from './Searchbar';
 import { SheetDemo } from './SideMenu';
 import Image from 'next/image';
 import Link from 'next/link';
-import Login_out from '../Login_out';
 
 function Navbar() {
   return (
@@ -33,7 +32,6 @@ function Navbar() {
       <div className="flex items-center sm:gap-4 gap-2">
         <Searchbar />
         <ModeToggle />
-        <Login_out />
         <SheetDemo />
       </div>
     </header>
