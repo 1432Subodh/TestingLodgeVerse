@@ -20,25 +20,33 @@ import {
   CommandShortcut,
 } from "@/components/ui/command"
 import { MapPinHouseIcon } from "lucide-react"
-import { useRef, useState } from "react"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+
 
 const addressKey = [
   "nutan nagar", 'korrha', 'lakhe', 'zabara', 'devangana', 'krishnpath', 'lochan path', 'suresh colony', 'prem nagar', 'bundel nagar', 'krishnapuri', 'babugaon', 'dipugarha'
 ]
 
 export function Commandbox() {
+  const router = useRouter();
 
   const [inputValue, setInputValue] = useState('')
   const handleInput = (event: React.KeyboardEvent<HTMLInputElement>) => {
     const target = event.target as HTMLInputElement;
     const value = target.value; // Access the input value
-    // console.log(target)
+
+    console.log(event.key)
     setInputValue(value);
+    if (event.key == 'Enter') {
+      // router.push(`/lodge/?search=${value}`)
+      window.location.href = `/lodge/?search=${value}`;
+    }
     // if()
   };
   return (
     <Command className="rounded-lg border shadow-md md:min-w-[450px]">
-        <CommandInput placeholder="Type a command or search..." onKeyUp={handleInput} />
+      <CommandInput placeholder="Type a command or search..." onKeyUp={handleInput} />
       <CommandList>
         {/* <CommandEmpty>No results found. <br /> <span className="text-xs font-light">Click on Search from more result.</span></CommandEmpty> */}
         <CommandGroup heading="Suggestions">
@@ -85,10 +93,10 @@ export function Commandbox() {
             ))
           }
         </CommandGroup>
-          <div className="flex  items-center py-1.5 my-1 px-2 cursor-pointer dark:bg-zinc-800 bg-zinc-300 mx-1 text-sm font-semibold rounded-md">
-            <MagnifyingGlassIcon className="mr-2 h-4 w-4" />
-            <span className="capitalize">Search for '{inputValue}'</span>
-          </div>
+        <a href={`/lodge?search=${inputValue}`} className="flex  items-center py-1.5 my-1 px-2 cursor-pointer dark:bg-zinc-800 bg-zinc-300 mx-1 text-sm font-semibold rounded-md">
+          <MagnifyingGlassIcon className="mr-2 h-4 w-4" />
+          <span className="capitalize">Search for '{inputValue}'</span>
+        </a>
 
       </CommandList>
     </Command>

@@ -15,10 +15,14 @@ function UploadLodge() {
         e.preventDefault();
 
         const form = e.target as HTMLFormElement;
-
+        const tokenizeString = (input: string): string[] => {
+            return input.toLowerCase().split(" "); // Split by spaces, normalize to lowercase
+        };
         // Extract form data
         const lodgeData = {
             LodgeName: (form.elements.namedItem("lodgeName") as HTMLInputElement).value,
+            LodgeNameLowerCase: ((form.elements.namedItem("lodgeName") as HTMLInputElement).value).toLowerCase().replaceAll(',',''),
+            AddressLowerCase: ((form.elements.namedItem("address") as HTMLTextAreaElement).value).toLowerCase().replaceAll(',',''),
             Address: (form.elements.namedItem("address") as HTMLTextAreaElement).value,
             OwnerName: (form.elements.namedItem("ownerName") as HTMLInputElement).value,
             Email: (form.elements.namedItem("email") as HTMLInputElement).value,
@@ -29,6 +33,8 @@ function UploadLodge() {
             Category: (form.elements.namedItem("category") as HTMLInputElement)?.value || "Uncategorized",
             GoogleMapsURL: (form.elements.namedItem("googleMapsUrl") as HTMLInputElement)?.value || "",
             KeyPlaces: (form.elements.namedItem("keyPlaces") as HTMLTextAreaElement)?.value || "",
+            LodgeNameKeywords: tokenizeString(((form.elements.namedItem("lodgeName") as HTMLInputElement).value).toLowerCase().replaceAll(',','')),
+            AddressKeywords: tokenizeString(((form.elements.namedItem("address") as HTMLTextAreaElement).value).toLowerCase().replaceAll(',','')),
         };
 
         // Prepare files for upload
@@ -77,10 +83,13 @@ function UploadLodge() {
                     if (!response.ok) {
                         reject(result.error || 'Failed to submit lodge data.');
                     }
+                    if (response.ok) {
 
-                    form.reset(); // Reset the form on success
+                        form.reset(); // Reset the form on success
+                    }
+
                     resolve(result.id); // Resolve promise with success
-                } catch (error:any) {
+                } catch (error: any) {
                     reject(error.message || 'Submission error.');
                 } finally {
                     setIsSubmitting(false);

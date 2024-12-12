@@ -65,7 +65,7 @@ export async function GET(){
     try {
         
         const querySnapshot: QuerySnapshot<DocumentData> = await getDocs(collection(db, "LodgeData"));
-        const fetchedLodges: DataType[] = querySnapshot.docs.map((doc) => ({
+        const fetchedLodges: any[] = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));

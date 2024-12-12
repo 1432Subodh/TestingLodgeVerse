@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { IndianRupee } from "lucide-react";
 import { fetchLodges } from "../../../HandleRequest/GetData";
 
+
 // Sample Loader Component
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -17,10 +18,11 @@ const Loader = () => (
 export type DataType = {
   id: string;
   Address?: string;
+  AddressLowerCase?: string;
   Email?: string;
   Facilities?: string;
   LodgeName?: string;
-  LodgeThumbnail?: string[];
+  LodgeThumbnail: string[];
   OwnerName?: string;
   PhoneNumber?: string;
   Rent?: string;
@@ -28,24 +30,53 @@ export type DataType = {
   Category?: string;
   GoogleMapsURL?: string;
   KeyPlaces?: string;
+  LodgeNameLowerCase?: string;
 };
 
-const Page: React.FC = () => {
+const Page: React.FC = ({ searchParams }: any) => {
   const [lodges, setLodges] = useState<DataType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [imageLoading, setImageLoading] = useState<Record<string, boolean>>({});
 
-  
-  const fetchData = async()=>{
+  const search = searchParams.search;
+
+  const fetchData = async () => {
     // setLoading(true)
-    let data:any = await fetchLodges()
+    let data: any = await fetchLodges()
     // console.log(data)
     setLodges(data)
     setLoading(false)
   }
+
+
+  const fetchSearchData = async () => {
+    const response = await fetch('/api/searchLodge', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        search,
+      }),
+    });
+    // console.log(await response.json())
+    setLodges(await response.json())
+    setLoading(false)
+
+  }
+
   useEffect(() => {
-    fetchData()
-    
+    if (search) {
+
+
+      fetchSearchData()
+
+
+
+    } else {
+      fetchData()
+    }
+
   }, []);
 
   const handleImageLoadStart = (id: string) => {
@@ -75,10 +106,10 @@ const Page: React.FC = () => {
                 {/* Category Label */}
                 <span
                   className={`absolute right-4 top-1 text-xs px-2 py-0.5 cursor-default rounded-sm ${lodge.Category === "Boys"
-                      ? "hover:bg-[#49a411c3] bg-green-700"
-                      : lodge.Category === "Girls"
-                        ? "bg-pink-600 hover:bg-[#ab107ac3]"
-                        : "hover:bg-yellow-600 bg-[#d99a2eb8]"
+                    ? "hover:bg-[#49a411c3] bg-green-700"
+                    : lodge.Category === "Girls"
+                      ? "bg-pink-600 hover:bg-[#ab107ac3]"
+                      : "hover:bg-yellow-600 bg-[#d99a2eb8]"
                     }`}
                 >
                   {lodge?.Category || "Uncategorized"}
