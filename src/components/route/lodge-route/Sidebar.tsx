@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 
 function Sidebar() {
   return (
-    <aside className="sm:flex hidden pt-14 flex-col w-64 h-full dark:bg-black bg-white fixed top-0 left-0 border-r border-border">
+    <aside className="sm:flex hidden pt-14 flex-col w-64 h-full  fixed top-0 left-0 border-r border-border">
       {/* Scrollable Content */}
       <ScrollArea className="flex-grow p-6">
         {/* Logo/Intro Section */}

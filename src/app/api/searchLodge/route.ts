@@ -1,4 +1,4 @@
-import { Lodge } from "@/app/test-api/page";
+import { Lodge } from "../../../../interface/All_InterFace"; 
 import { db } from "@/config/FirebaseConfig";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { NextResponse } from "next/server"

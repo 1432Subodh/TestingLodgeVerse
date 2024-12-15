@@ -71,7 +71,7 @@ export const description =
 
 export function Dashboard() {
     return (
-        <div className="flex min-h-screen w-full flex-col bg-muted/40">
+        <div className="pt-12 flex min-h-screen w-full flex-col bg-muted/40">
             <aside className="fixed inset-y-0 left-0 top-12 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
                 <nav className="flex flex-col items-center gap-4 px-2 sm:py-4">
 

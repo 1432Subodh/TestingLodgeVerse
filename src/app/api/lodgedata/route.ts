@@ -69,7 +69,7 @@ export async function GET(){
           id: doc.id,
           ...doc.data(),
         }));
-        console.log(fetchedLodges)
+        // console.log(fetchedLodges)
         return NextResponse.json(fetchedLodges)
 
     } catch (error) {

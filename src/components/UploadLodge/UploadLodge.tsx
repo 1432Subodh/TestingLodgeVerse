@@ -7,22 +7,29 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import toast, { Toaster } from 'react-hot-toast';
+import { json } from 'stream/consumers';
 
 function UploadLodge() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const RawUser = localStorage.getItem('user')
+
+    
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
+    
+        const MAX_FILE_SIZE = 500 * 1024; // 500KB
+    
         const form = e.target as HTMLFormElement;
         const tokenizeString = (input: string): string[] => {
             return input.toLowerCase().split(" "); // Split by spaces, normalize to lowercase
         };
+    
         // Extract form data
         const lodgeData = {
             LodgeName: (form.elements.namedItem("lodgeName") as HTMLInputElement).value,
-            LodgeNameLowerCase: ((form.elements.namedItem("lodgeName") as HTMLInputElement).value).toLowerCase().replaceAll(',',''),
-            AddressLowerCase: ((form.elements.namedItem("address") as HTMLTextAreaElement).value).toLowerCase().replaceAll(',',''),
+            LodgeNameLowerCase: ((form.elements.namedItem("lodgeName") as HTMLInputElement).value).toLowerCase().replaceAll(',', ''),
+            AddressLowerCase: ((form.elements.namedItem("address") as HTMLTextAreaElement).value).toLowerCase().replaceAll(',', ''),
             Address: (form.elements.namedItem("address") as HTMLTextAreaElement).value,
             OwnerName: (form.elements.namedItem("ownerName") as HTMLInputElement).value,
             Email: (form.elements.namedItem("email") as HTMLInputElement).value,
@@ -33,16 +40,20 @@ function UploadLodge() {
             Category: (form.elements.namedItem("category") as HTMLInputElement)?.value || "Uncategorized",
             GoogleMapsURL: (form.elements.namedItem("googleMapsUrl") as HTMLInputElement)?.value || "",
             KeyPlaces: (form.elements.namedItem("keyPlaces") as HTMLTextAreaElement)?.value || "",
-            LodgeNameKeywords: tokenizeString(((form.elements.namedItem("lodgeName") as HTMLInputElement).value).toLowerCase().replaceAll(',','')),
-            AddressKeywords: tokenizeString(((form.elements.namedItem("address") as HTMLTextAreaElement).value).toLowerCase().replaceAll(',','')),
+            LodgeNameKeywords: tokenizeString(((form.elements.namedItem("lodgeName") as HTMLInputElement).value).toLowerCase().replaceAll(',', '')),
+            AddressKeywords: tokenizeString(((((form.elements.namedItem("address") as HTMLTextAreaElement).value) + ` ${(form.elements.namedItem("category") as HTMLInputElement)?.value || "Uncategorized"}`) + ` ${(form.elements.namedItem("keyPlaces") as HTMLTextAreaElement)?.value || ""}`).toLowerCase().replaceAll(',', '')),
         };
-
+    
         // Prepare files for upload
         const fileInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="file"]'));
         const files = await Promise.all(
             fileInputs.map(async (fileInput, index) => {
                 const file = fileInput.files?.[0];
                 if (file) {
+                    if (file.size > MAX_FILE_SIZE) {
+                        toast.error(`File ${index + 1} exceeds 500KB. Please upload smaller files.`);
+                        return null; // Reject files larger than 500KB
+                    }
                     const prefix = `LodgeImage/Image_${index + 1}`;
                     const content = await file.arrayBuffer();
                     return {
@@ -54,18 +65,19 @@ function UploadLodge() {
                 return null;
             })
         );
-
+    
         // Collect file URLs
         const fileUrls = Array.from(form.querySelectorAll<HTMLInputElement>('input[name^="fileUrl"]'))
             .map((input) => input.value)
             .filter((url) => url);
-
+    
         // Use toast.promise for handling async submission with feedback
         await toast.promise(
             new Promise(async (resolve, reject) => {
                 try {
                     setIsSubmitting(true);
-
+         
+    
                     const response = await fetch('/api/lodgedata', {
                         method: 'POST',
                         headers: {
@@ -73,21 +85,20 @@ function UploadLodge() {
                         },
                         body: JSON.stringify({
                             lodgeData,
-                            files: files.filter(Boolean),
+                            files: files.filter(Boolean), // Filter out invalid or oversized files
                             fileUrls,
                         }),
                     });
-
+    
                     const result = await response.json();
-
+    
                     if (!response.ok) {
                         reject(result.error || 'Failed to submit lodge data.');
                     }
                     if (response.ok) {
-
                         form.reset(); // Reset the form on success
                     }
-
+    
                     resolve(result.id); // Resolve promise with success
                 } catch (error: any) {
                     reject(error.message || 'Submission error.');
@@ -102,8 +113,10 @@ function UploadLodge() {
             }
         );
     };
+    
 
     return (
+        <>
         <form onSubmit={handleSubmit}>
             <Toaster /> {/* Add the Toaster component for displaying notifications */}
             <CardContent className="p-6 text-sm">
@@ -164,8 +177,8 @@ function UploadLodge() {
                             <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Girls">Girls</SelectItem>
-                            <SelectItem value="Boys">Boys</SelectItem>
+                            <SelectItem value="Girls">Girl</SelectItem>
+                            <SelectItem value="Boys">Boy</SelectItem>
                             <SelectItem value="Family">Family</SelectItem>
                         </SelectContent>
                     </Select>
@@ -209,6 +222,7 @@ function UploadLodge() {
                 </div>
             </CardContent>
         </form>
+        </>
     );
 }
 

@@ -105,7 +105,7 @@ const Page: React.FC = ({ searchParams }: any) => {
               <div className="sm:w-full w-44 sm:h-32 h-full relative">
                 {/* Category Label */}
                 <span
-                  className={`absolute right-4 top-1 text-xs px-2 py-0.5 cursor-default rounded-sm ${lodge.Category === "Boys"
+                  className={`absolute right-1 top-1 text-xs px-2 py-0.5 cursor-default rounded-sm ${lodge.Category === "Boys"
                     ? "hover:bg-[#49a411c3] bg-green-700"
                     : lodge.Category === "Girls"
                       ? "bg-pink-600 hover:bg-[#ab107ac3]"

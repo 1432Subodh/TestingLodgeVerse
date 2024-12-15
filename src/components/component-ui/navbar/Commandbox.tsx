@@ -85,11 +85,13 @@ export function Commandbox() {
         <CommandGroup heading="Address">
           {
             addressKey.map((key) => (
+              <a href={`/lodge?search=${key}`} key={key}>
 
-              <CommandItem key={key}>
-                <MapPinHouseIcon className="mr-2 h-4 w-4" />
-                <span className="capitalize">{key}</span>
-              </CommandItem>
+                <CommandItem>
+                  <MapPinHouseIcon className="mr-2 h-4 w-4" />
+                  <span className="capitalize">{key}</span>
+                </CommandItem>
+              </a>
             ))
           }
         </CommandGroup>

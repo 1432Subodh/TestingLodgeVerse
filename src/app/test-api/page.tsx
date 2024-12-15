@@ -1,151 +1,97 @@
 'use client'
-import React, { useState } from "react";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "@/config/FirebaseConfig";
+import React, { useState, ChangeEvent } from "react";
 
+const ImageUploader: React.FC = () => {
+  const [compressedFile, setCompressedFile] = useState<File | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
-export interface Lodge {
-  id: string;
-  LodgeName: string;
-  Address: string;
-  OwnerName: string;
-  Email: string;
-  PhoneNumber: string;
-  Facilities: string;
-  Rent: string;
-  Size: string;
-  Category: string;
-  GoogleMapsURL: string;
-  KeyPlaces: string;
-  LodgeNameKeywords: string[];
-  AddressKeywords: string[];
-  LodgeThumbnail: string[];
-}
+  const MAX_FILE_SIZE = 500 * 1024; // 500KB
 
-const SearchLodge: React.FC = () => {
-  const [searchText, setSearchText] = useState<string>("");
-  const [results, setResults] = useState<Lodge[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
 
-  const handleSearch = async () => {
-    if (!searchText.trim()) return;
-
-    setLoading(true);
-
-    // try {
-    //   const lodgesRef = collection(db, "LodgeData"); // Replace "lodges" with your Firestore collection name
-    //   const normalizedSearchText = searchText.toLowerCase(); // Normalize the input
-
-    //   // Query for LodgeNameKeywords
-    //   const nameQuery = query(
-    //     lodgesRef,
-    //     where("LodgeNameKeywords", "array-contains", normalizedSearchText)
-    //   );
-
-    //   // Query for AddressKeywords
-    //   const addressQuery = query(
-    //     lodgesRef,
-    //     where("AddressKeywords", "array-contains", normalizedSearchText)
-    //   );
-
-    //   // Fetch results from both queries
-    //   const [nameSnapshot, addressSnapshot] = await Promise.all([
-    //     getDocs(nameQuery),
-    //     getDocs(addressQuery),
-    //   ]);
-
-    //   const nameResults: Lodge[] = nameSnapshot.docs.map((doc) => ({
-    //     id: doc.id,
-    //     ...doc.data(),
-    //   })) as Lodge[];
-
-    //   const addressResults: Lodge[] = addressSnapshot.docs.map((doc) => ({
-    //     id: doc.id,
-    //     ...doc.data(),
-    //   })) as Lodge[];
-
-    //   // Combine and deduplicate results
-    //   const combinedResults = [
-    //     ...nameResults,
-    //     ...addressResults.filter(
-    //       (addressResult) =>
-    //         !nameResults.find((nameResult) => nameResult.id === addressResult.id)
-    //     ),
-    //   ];
-
-      
-
-    //   setResults(combinedResults);
-    // } catch (error) {
-    //   console.error("Error searching lodges:", error);
-    //   setResults([]);
-    // } finally {
-    //   setLoading(false);
-    // }
-
-    const response = await fetch('/api/searchLodge', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        searchText,
-      }),
-    });
-    setResults(await response.json())
-    setLoading(false)
+    if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        const compressedImage = await compressImage(file);
+        if (compressedImage.size > MAX_FILE_SIZE) {
+          setErrorMessage("File is too large, even after compression.");
+          setCompressedFile(null);
+          return;
+        }
+        setCompressedFile(compressedImage);
+        setErrorMessage("");
+      } else {
+        setCompressedFile(file);
+        setErrorMessage("");
+      }
+    }
   };
 
-  
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onload = () => {
+        const img = new Image();
+        img.src = reader.result as string;
+
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          if (!ctx) {
+            console.error("Canvas context could not be created.");
+            return resolve(file); // Fallback: return original file if canvas fails
+          }
+
+          const MAX_WIDTH = 800; // Resize width
+          const scaleFactor = MAX_WIDTH / img.width;
+          canvas.width = MAX_WIDTH;
+          canvas.height = img.height * scaleFactor;
+
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(new File([blob], file.name, { type: file.type }));
+              } else {
+                resolve(file); // Fallback: return original file if blob creation fails
+              }
+            },
+            file.type,
+            0.7 // Compression quality
+          );
+        };
+      };
+    });
+  };
+
+  const handleUpload = () => {
+    if (compressedFile) {
+      // Implement your upload logic here
+      console.log("Uploading:", compressedFile);
+      alert("Image ready for upload!");
+    }
+  };
 
   return (
     <div className="mt-20">
-      <h1>Search Lodge</h1>
       <input
-        type="text"
-        placeholder="Search by name or address"
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        style={{ padding: "10px", width: "300px" }}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
       />
-      <button onClick={handleSearch} style={{ marginLeft: "10px", padding: "10px" }}>
-        Search
+      {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+      <button
+        onClick={handleUpload}
+        disabled={!compressedFile}
+      >
+        Upload
       </button>
-
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <div>
-          {results.length > 0 ? (
-            results.map((lodge) => (
-              <div key={lodge.id} style={{ border: "1px solid #ccc", margin: "10px", padding: "10px" }}>
-                <h3>{lodge.LodgeName}</h3>
-                <p>Address: {lodge.Address}</p>
-                <p>Rent: {lodge.Rent}</p>
-                <p>Facilities: {lodge.Facilities}</p>
-                <p>Owner: {lodge.OwnerName}</p>
-                <a href={lodge.GoogleMapsURL} target="_blank" rel="noopener noreferrer">
-                  View on Google Maps
-                </a>
-                <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-                  {lodge.LodgeThumbnail.map((url, index) => (
-                    <img
-                      key={index}
-                      src={url}
-                      alt={`${lodge.LodgeName} thumbnail`}
-                      style={{ width: "100px", height: "100px", objectFit: "cover" }}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))
-          ) : (
-            <p>No results found</p>
-          )}
-        </div>
-      )}
     </div>
   );
 };
 
-export default SearchLodge;
+export default ImageUploader;
