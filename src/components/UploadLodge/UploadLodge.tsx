@@ -37,7 +37,7 @@ function UploadLodge() {
             Facilities: (form.elements.namedItem("facilities") as HTMLTextAreaElement).value,
             Rent: (form.elements.namedItem("rent") as HTMLInputElement).value,
             Size: (form.elements.namedItem("size") as HTMLInputElement)?.value || "N/A",
-            Category: (form.elements.namedItem("category") as HTMLInputElement)?.value || "Uncategorized",
+            Category: ((form.elements.namedItem("category") as HTMLInputElement)?.value).toLowerCase() || "Uncategorized",
             GoogleMapsURL: (form.elements.namedItem("googleMapsUrl") as HTMLInputElement)?.value || "",
             KeyPlaces: (form.elements.namedItem("keyPlaces") as HTMLTextAreaElement)?.value || "",
             LodgeNameKeywords: tokenizeString(((form.elements.namedItem("lodgeName") as HTMLInputElement).value).toLowerCase().replaceAll(',', '')),
@@ -177,8 +177,8 @@ function UploadLodge() {
                             <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Girls">Girl</SelectItem>
-                            <SelectItem value="Boys">Boy</SelectItem>
+                            <SelectItem value="Girl">Girl</SelectItem>
+                            <SelectItem value="Boy">Boy</SelectItem>
                             <SelectItem value="Family">Family</SelectItem>
                         </SelectContent>
                     </Select>

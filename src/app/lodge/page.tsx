@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { IndianRupee } from "lucide-react";
 import { fetchLodges } from "../../../HandleRequest/GetData";
+import { serialize } from "v8";
 
 
 // Sample Loader Component
@@ -38,7 +39,10 @@ const Page: React.FC = ({ searchParams }: any) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [imageLoading, setImageLoading] = useState<Record<string, boolean>>({});
 
-  const search = searchParams.search;
+  const search = (searchParams.search);
+  // if(search)
+  // let search = searchParam.split(' ')[0]
+  // console.log(search)
 
   const fetchData = async () => {
     // setLoading(true)
@@ -50,6 +54,7 @@ const Page: React.FC = ({ searchParams }: any) => {
 
 
   const fetchSearchData = async () => {
+  
     const response = await fetch('/api/searchLodge', {
       method: 'POST',
       headers: {
@@ -105,9 +110,9 @@ const Page: React.FC = ({ searchParams }: any) => {
               <div className="sm:w-full w-44 sm:h-32 h-full relative">
                 {/* Category Label */}
                 <span
-                  className={`absolute right-1 top-1 text-xs px-2 py-0.5 cursor-default rounded-sm ${lodge.Category === "Boys"
+                  className={`absolute right-1 top-1 text-xs px-2 py-0.5 cursor-default capitalize rounded-sm ${lodge.Category === "boy"
                     ? "hover:bg-[#49a411c3] bg-green-700"
-                    : lodge.Category === "Girls"
+                    : lodge.Category === "girl"
                       ? "bg-pink-600 hover:bg-[#ab107ac3]"
                       : "hover:bg-yellow-600 bg-[#d99a2eb8]"
                     }`}
