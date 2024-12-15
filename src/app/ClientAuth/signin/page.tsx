@@ -1,12 +1,15 @@
 import LoginPage from '@/components/LogAndOut/LoginPage'
-import React from 'react'
+import React, { Suspense } from 'react'
 import { Toaster } from 'react-hot-toast'
 
 function page() {
   return (
     <>
-    <LoginPage/>
-    <Toaster/>
+      <Suspense>
+
+        <LoginPage />
+        <Toaster />
+      </Suspense>
     </>
   )
 }
