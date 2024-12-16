@@ -40,7 +40,7 @@ function UploadLodge() {
             Category: ((form.elements.namedItem("category") as HTMLInputElement)?.value).toLowerCase() || "Uncategorized",
             GoogleMapsURL: (form.elements.namedItem("googleMapsUrl") as HTMLInputElement)?.value || "",
             KeyPlaces: (form.elements.namedItem("keyPlaces") as HTMLTextAreaElement)?.value || "",
-            NumberOfStudents: (form.elements.namedItem("NumberOfStudents") as HTMLInputElement).value,
+            NumberOfBed: (form.elements.namedItem("NumberOfStudents") as HTMLInputElement).value,
             LodgeNameKeywords: tokenizeString(((form.elements.namedItem("lodgeName") as HTMLInputElement).value).toLowerCase().replaceAll(',', '')),
             AddressKeywords: tokenizeString(((((form.elements.namedItem("address") as HTMLTextAreaElement).value) + ` ${(form.elements.namedItem("category") as HTMLInputElement)?.value || "Uncategorized"}`) + ` ${(form.elements.namedItem("keyPlaces") as HTMLTextAreaElement)?.value || ""}`).toLowerCase().replaceAll(',', '')),
         };
@@ -175,7 +175,7 @@ function UploadLodge() {
                     <div className="grid gap-3">
                         <div className="font-semibold">Room Details</div>
                         <Input id="rent" placeholder="Rent" type="number" required />
-                        <Input id="NumberOfStudents" placeholder="Number of Students" type="number" required />
+                        <Input id="NumberOfBed" placeholder="Number of Bed" type="number" required />
                         <Select name="size">
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select size" />

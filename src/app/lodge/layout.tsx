@@ -1,4 +1,9 @@
 import Sidebar from "@/components/route/lodge-route/Sidebar";
+import { Metadata } from "next";
+export const metadata: Metadata = {
+  title: "Find Lodge",
+  description: "Discover, manage, and explore comfortable and affordable lodging options with ease on Lodge Verse.",
+};
 
 export default function RootLayout({
   children,

@@ -6,12 +6,12 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { IndianRupee } from "lucide-react";
 import { fetchLodges } from "../../../HandleRequest/GetData";
-import { serialize } from "v8";
+
 
 
 // Sample Loader Component
 const Loader = () => (
-  <div className="flex justify-center items-center h-screen">
+  <div className="flex justify-center items-center h-[85vh]">
     <div className="loader border-t-4 border-primary rounded-full w-12 h-12 animate-spin"></div>
   </div>
 );
@@ -165,7 +165,7 @@ const Page: React.FC = ({ searchParams }: any) => {
           ))}
         </div>
       ) : (
-        <p>No data available.</p>
+        <div className="flex justify-center w-full h-[77vh] items-center"><p>No data available.</p></div>
       )}
     </div>
   );

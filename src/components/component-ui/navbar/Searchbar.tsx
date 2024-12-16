@@ -29,7 +29,7 @@ function Searchbar() {
           </div>
         </DialogTrigger>
 
-        <DialogContent>
+        <DialogContent className='mt-10'>
           <DialogHeader></DialogHeader>
           <DialogTitle></DialogTitle>
           <DialogDescription></DialogDescription>

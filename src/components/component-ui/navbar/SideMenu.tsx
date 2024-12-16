@@ -4,7 +4,7 @@ import {
     SheetContent,
     SheetTrigger,
 } from "@/components/ui/sheet"
-import { TextAlignRightIcon } from "@radix-ui/react-icons"
+import { TextAlignLeftIcon } from "@radix-ui/react-icons"
 import { Home, LineChart, Package, Package2, ShoppingCart, Users2Icon } from "lucide-react"
 import Link from "next/link"
 
@@ -16,10 +16,10 @@ export function SheetDemo() {
                 <SheetTrigger asChild>
                     <Button variant="outline" size="icon">
 
-                        <TextAlignRightIcon width="22" height="22" />
+                        <TextAlignLeftIcon width="22" height="22" />
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="sm:max-w-xs">
+                <SheetContent side="left" className="sm:max-w-xs">
                             <nav className="grid gap-6 text-lg font-medium">
                                 <Link
                                     href="#"

@@ -22,6 +22,7 @@ import {
 import { MapPinHouseIcon } from "lucide-react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 
 const addressKey = [
@@ -75,11 +76,13 @@ export function Commandbox() {
             <span>Mail</span>
             <CommandShortcut>⌘B</CommandShortcut>
           </CommandItem>
+          <Link href={'/admin/dashboard'}>
           <CommandItem>
             <GearIcon className="mr-2 h-4 w-4" />
-            <span>Settings</span>
+            <span>Admin</span>
             <CommandShortcut>⌘S</CommandShortcut>
           </CommandItem>
+          </Link>
         </CommandGroup>
 
         <CommandGroup heading="Address">

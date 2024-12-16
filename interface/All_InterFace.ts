@@ -14,4 +14,5 @@ export interface Lodge {
     LodgeNameKeywords: string[];
     AddressKeywords: string[];
     LodgeThumbnail: string[];
+    NumberOfBed :string
   }
