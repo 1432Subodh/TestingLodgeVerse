@@ -40,7 +40,7 @@ function UploadLodge() {
             Category: ((form.elements.namedItem("category") as HTMLInputElement)?.value).toLowerCase() || "Uncategorized",
             GoogleMapsURL: (form.elements.namedItem("googleMapsUrl") as HTMLInputElement)?.value || "",
             KeyPlaces: (form.elements.namedItem("keyPlaces") as HTMLTextAreaElement)?.value || "",
-            NumberOfBed: (form.elements.namedItem("NumberOfStudents") as HTMLInputElement).value,
+            NumberOfBed: (form.elements.namedItem("NumberOfStudents") as HTMLInputElement)?.value,
             LodgeNameKeywords: tokenizeString(((form.elements.namedItem("lodgeName") as HTMLInputElement).value).toLowerCase().replaceAll(',', '')),
             AddressKeywords: tokenizeString(((((form.elements.namedItem("address") as HTMLTextAreaElement).value) + ` ${(form.elements.namedItem("category") as HTMLInputElement)?.value || "Uncategorized"}`) + ` ${(form.elements.namedItem("keyPlaces") as HTMLTextAreaElement)?.value || ""}`).toLowerCase().replaceAll(',', '')),
         };
