@@ -14,17 +14,17 @@ function UploadLodge() {
 
     const RawUser = localStorage.getItem('user')
 
-    
+
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-    
-        const MAX_FILE_SIZE = 500 * 1024; // 500KB
-    
+
+        const MAX_FILE_SIZE = 1 * 1024 * 1024;
+
         const form = e.target as HTMLFormElement;
         const tokenizeString = (input: string): string[] => {
             return input.toLowerCase().split(" "); // Split by spaces, normalize to lowercase
         };
-    
+
         // Extract form data
         const lodgeData = {
             LodgeName: (form.elements.namedItem("lodgeName") as HTMLInputElement).value,
@@ -40,20 +40,39 @@ function UploadLodge() {
             Category: ((form.elements.namedItem("category") as HTMLInputElement)?.value).toLowerCase() || "Uncategorized",
             GoogleMapsURL: (form.elements.namedItem("googleMapsUrl") as HTMLInputElement)?.value || "",
             KeyPlaces: (form.elements.namedItem("keyPlaces") as HTMLTextAreaElement)?.value || "",
+            NumberOfStudents: (form.elements.namedItem("NumberOfStudents") as HTMLInputElement).value,
             LodgeNameKeywords: tokenizeString(((form.elements.namedItem("lodgeName") as HTMLInputElement).value).toLowerCase().replaceAll(',', '')),
             AddressKeywords: tokenizeString(((((form.elements.namedItem("address") as HTMLTextAreaElement).value) + ` ${(form.elements.namedItem("category") as HTMLInputElement)?.value || "Uncategorized"}`) + ` ${(form.elements.namedItem("keyPlaces") as HTMLTextAreaElement)?.value || ""}`).toLowerCase().replaceAll(',', '')),
         };
-    
+
         // Prepare files for upload
         const fileInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="file"]'));
+        // const oversizedFiles = fileInputs.filter((fileInput) => {
+        //     const file = fileInput.files?.[0];
+        //     return file && file.size > MAX_FILE_SIZE;
+        // });
+
+        // If there are oversized files, show an error and exit
+        // Check for oversized files and map to their original indices
+        const oversizedFiles = fileInputs
+            .map((fileInput, index) => ({ fileInput, index })) // Include original index
+            .filter(({ fileInput }) => {
+                const file = fileInput.files?.[0];
+                return file && file.size > MAX_FILE_SIZE;
+            });
+
+        if (oversizedFiles.length > 0) {
+            oversizedFiles.forEach(({ index }) => {
+                toast.error(`File ${index + 1} exceeds 1MB. Please upload smaller files.`);
+            });
+            return; // Exit without hitting the API
+        }
+
+
         const files = await Promise.all(
             fileInputs.map(async (fileInput, index) => {
                 const file = fileInput.files?.[0];
                 if (file) {
-                    if (file.size > MAX_FILE_SIZE) {
-                        toast.error(`File ${index + 1} exceeds 500KB. Please upload smaller files.`);
-                        return null; // Reject files larger than 500KB
-                    }
                     const prefix = `LodgeImage/Image_${index + 1}`;
                     const content = await file.arrayBuffer();
                     return {
@@ -65,19 +84,18 @@ function UploadLodge() {
                 return null;
             })
         );
-    
+
         // Collect file URLs
         const fileUrls = Array.from(form.querySelectorAll<HTMLInputElement>('input[name^="fileUrl"]'))
             .map((input) => input.value)
             .filter((url) => url);
-    
+
         // Use toast.promise for handling async submission with feedback
         await toast.promise(
             new Promise(async (resolve, reject) => {
                 try {
                     setIsSubmitting(true);
-         
-    
+
                     const response = await fetch('/api/lodgedata', {
                         method: 'POST',
                         headers: {
@@ -85,20 +103,20 @@ function UploadLodge() {
                         },
                         body: JSON.stringify({
                             lodgeData,
-                            files: files.filter(Boolean), // Filter out invalid or oversized files
+                            files: files.filter(Boolean), // Filter out invalid files
                             fileUrls,
                         }),
                     });
-    
+
                     const result = await response.json();
-    
+
                     if (!response.ok) {
                         reject(result.error || 'Failed to submit lodge data.');
                     }
                     if (response.ok) {
                         form.reset(); // Reset the form on success
                     }
-    
+
                     resolve(result.id); // Resolve promise with success
                 } catch (error: any) {
                     reject(error.message || 'Submission error.');
@@ -113,115 +131,117 @@ function UploadLodge() {
             }
         );
     };
-    
+
+
 
     return (
         <>
-        <form onSubmit={handleSubmit}>
-            <Toaster /> {/* Add the Toaster component for displaying notifications */}
-            <CardContent className="p-6 text-sm">
-                {/* Lodge Details */}
-                <div className="grid gap-3">
-                    <div className="font-semibold">Lodge Details</div>
-                    <Input id="lodgeName" placeholder="Enter lodge name" required />
-                    <Textarea id="address" placeholder="Enter address" required />
-                    <Input id="googleMapsUrl" placeholder="Google Maps URL" required />
-                </div>
-                <Separator className="my-4" />
+            <form onSubmit={handleSubmit}>
+                <Toaster /> {/* Add the Toaster component for displaying notifications */}
+                <CardContent className="p-6 text-sm">
+                    {/* Lodge Details */}
+                    <div className="grid gap-3">
+                        <div className="font-semibold">Lodge Details</div>
+                        <Input id="lodgeName" placeholder="Enter lodge name" required />
+                        <Textarea id="address" placeholder="Enter address" required />
+                        <Input id="googleMapsUrl" placeholder="Google Maps URL" required />
+                    </div>
+                    <Separator className="my-4" />
 
-                {/* Owner Details */}
-                <div className="grid gap-3">
-                    <div className="font-semibold">Owner Contact Details</div>
-                    <Input id="ownerName" placeholder="Owner Name" required />
-                    <Input id="email" placeholder="Owner Email" type="email" required />
-                    <Input id="phoneNumber" placeholder="Owner Phone Number" type="number" required />
-                </div>
-                <Separator className="my-4" />
+                    {/* Owner Details */}
+                    <div className="grid gap-3">
+                        <div className="font-semibold">Owner Contact Details</div>
+                        <Input id="ownerName" placeholder="Owner Name" required />
+                        <Input id="email" placeholder="Owner Email" type="email" required />
+                        <Input id="phoneNumber" placeholder="Owner Phone Number" type="number" required />
+                    </div>
+                    <Separator className="my-4" />
 
-                {/* Facilities */}
-                <div className="grid gap-3">
-                    <div className="font-semibold">Facilities & Amenities</div>
-                    <Textarea id="facilities" placeholder="Enter facilities" required />
-                </div>
-                <Separator className="my-4" />
+                    {/* Facilities */}
+                    <div className="grid gap-3">
+                        <div className="font-semibold">Facilities & Amenities</div>
+                        <Textarea id="facilities" placeholder="Enter facilities" required />
+                    </div>
+                    <Separator className="my-4" />
 
-                {/* Key Places Section */}
-                <div className="grid gap-3">
-                    <div className="font-semibold">Key Places</div>
-                    <Textarea id="keyPlaces" placeholder="Nearby landmarks, markets, or points of interest" required />
-                </div>
-                <Separator className="my-4" />
+                    {/* Key Places Section */}
+                    <div className="grid gap-3">
+                        <div className="font-semibold">Key Places</div>
+                        <Textarea id="keyPlaces" placeholder="Nearby landmarks, markets, or points of interest" required />
+                    </div>
+                    <Separator className="my-4" />
 
-                {/* Room Details */}
-                <div className="grid gap-3">
-                    <div className="font-semibold">Room Details</div>
-                    <Input id="rent" placeholder="Rent" type="number" required />
-                    <Select name="size">
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select size" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Small">10x10 (Small)</SelectItem>
-                            <SelectItem value="Big">12x12 (Big)</SelectItem>
-                            <SelectItem value="Large">Large</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-                <Separator className="my-4" />
+                    {/* Room Details */}
+                    <div className="grid gap-3">
+                        <div className="font-semibold">Room Details</div>
+                        <Input id="rent" placeholder="Rent" type="number" required />
+                        <Input id="NumberOfStudents" placeholder="Number of Students" type="number" required />
+                        <Select name="size">
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select size" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Small">10x10 (Small)</SelectItem>
+                                <SelectItem value="Big">12x12 (Big)</SelectItem>
+                                <SelectItem value="Large">Large</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <Separator className="my-4" />
 
-                {/* Category Selector */}
-                <div className="grid gap-3">
-                    <div className="font-semibold">Category</div>
-                    <Select name="category" required>
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Girl">Girl</SelectItem>
-                            <SelectItem value="Boy">Boy</SelectItem>
-                            <SelectItem value="Family">Family</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-                <Separator className="my-4" />
+                    {/* Category Selector */}
+                    <div className="grid gap-3">
+                        <div className="font-semibold">Category</div>
+                        <Select name="category" required>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Girl">Girl</SelectItem>
+                                <SelectItem value="Boy">Boy</SelectItem>
+                                <SelectItem value="Family">Family</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <Separator className="my-4" />
 
-                {/* File Upload */}
-                <div className="grid gap-3">
-                    <div className="font-semibold">Upload Images</div>
-                    {Array.from({ length: 3 }).map((_, index) => (
-                        <div key={index}>
-                            <label className="flex items-center gap-1">
-                                File {index + 1}:
-                                <Input type="file" accept="image/*" />
-                            </label>
-                        </div>
-                    ))}
-                </div>
+                    {/* File Upload */}
+                    <div className="grid gap-3">
+                        <div className="font-semibold">Upload Images <span className='text-red-700'>* Image size will be under 1MB</span></div>
+                        {Array.from({ length: 3 }).map((_, index) => (
+                            <div key={index}>
+                                <label className="flex items-center gap-1">
+                                    File {index + 1}:
+                                    <Input type="file" accept="image/*" />
+                                </label>
+                            </div>
+                        ))}
+                    </div>
 
-                {/* File URLs */}
-                <div className="grid gap-3 mt-4">
-                    <div className="font-semibold">Or Provide Image URLs</div>
-                    {Array.from({ length: 3 }).map((_, index) => (
-                        <div key={index}>
-                            <label className="flex items-center gap-1">
-                                URL {index + 1}:
-                                <Input name={`fileUrl_${index}`} placeholder="Enter file URL" />
-                            </label>
-                        </div>
-                    ))}
-                </div>
+                    {/* File URLs */}
+                    <div className="grid gap-3 mt-4">
+                        <div className="font-semibold">Or Provide Image URLs</div>
+                        {Array.from({ length: 3 }).map((_, index) => (
+                            <div key={index}>
+                                <label className="flex items-center gap-1">
+                                    URL {index + 1}:
+                                    <Input name={`fileUrl_${index}`} placeholder="Enter file URL" />
+                                </label>
+                            </div>
+                        ))}
+                    </div>
 
-                <div className="flex justify-end mt-4">
-                    <button
-                        type="submit"
-                        className="bg-background hover:bg-accent px-3 py-1.5 rounded-md"
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? "Submitting..." : "Submit"}
-                    </button>
-                </div>
-            </CardContent>
-        </form>
+                    <div className="flex justify-end mt-4">
+                        <button
+                            type="submit"
+                            className="bg-background hover:bg-accent px-3 py-1.5 rounded-md"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? "Submitting..." : "Submit"}
+                        </button>
+                    </div>
+                </CardContent>
+            </form>
         </>
     );
 }
