@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { IndianRupee } from "lucide-react";
 import { fetchLodges } from "../../../HandleRequest/GetData";
+import { Span } from "next/dist/trace";
 
 
 
@@ -54,7 +55,7 @@ const Page: React.FC = ({ searchParams }: any) => {
 
 
   const fetchSearchData = async () => {
-  
+
     const response = await fetch('/api/searchLodge', {
       method: 'POST',
       headers: {
@@ -145,8 +146,11 @@ const Page: React.FC = ({ searchParams }: any) => {
                     {lodge.LodgeName || "Lodge Name"}
                   </h1>
                   <p className="text-muted-foreground text-sm leading-4">
-                    {lodge.Address || "No address available."}
+                    {lodge.Address
+                      ? lodge.Address.split(" ").slice(0, 7).join(" ") + (lodge.Address.split(" ").length > 7 ? "..." : "")
+                      : "No address available."}
                   </p>
+
                 </div>
                 <div className="flex items-center justify-between sm:pt-0 pt-3">
                   <p className="flex items-center">

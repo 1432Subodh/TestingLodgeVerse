@@ -103,8 +103,8 @@ function UploadLodge() {
                         },
                         body: JSON.stringify({
                             lodgeData,
-                            files: files.filter(Boolean), // Filter out invalid files
                             fileUrls,
+                            files: files.filter(Boolean), // Filter out invalid files
                         }),
                     });
 

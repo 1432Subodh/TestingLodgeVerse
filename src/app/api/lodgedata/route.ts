@@ -15,8 +15,8 @@ export async function POST(req: Request) {
 
         const {
             lodgeData, // Basic lodge data (name, address, etc.)
+            fileUrls,  // External image URLs
             files,    // Files to upload
-            fileUrls  // External image URLs
         } = body;
 
         // Upload files to Supabase
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
         );
 
         // Combine file URLs and uploaded file paths
-        const LodgeThumbnail = [...uploadedFilePaths.filter(Boolean), ...fileUrls];
+        const LodgeThumbnail = [ ...fileUrls, ...uploadedFilePaths.filter(Boolean)];
 
         // Ensure at least one image is provided
         if (LodgeThumbnail.length === 0) {
