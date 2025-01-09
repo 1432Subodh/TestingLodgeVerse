@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 
 const LoginPage: React.FC = () => {
     const searchParams = useSearchParams();
-    const isAdmin = searchParams.get('admin');
+    const isAdmin = searchParams ? searchParams.get('admin') : null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
