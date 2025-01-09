@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,11 +39,11 @@ const Page: React.FC = ({ searchParams }: any) => {
 
   const search = searchParams.search;
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     let data: any = await fetchLodges();
     setLodges(data);
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     const fetchSearchData = async () => {
@@ -63,7 +63,7 @@ const Page: React.FC = ({ searchParams }: any) => {
     } else {
       fetchData();
     }
-  }, [search]);
+  }, [search, fetchData]);
 
   const handleImageLoadStart = (id: string) => {
     setImageLoading((prev) => ({ ...prev, [id]: true }));

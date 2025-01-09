@@ -34,7 +34,7 @@ const Hero: React.FC = () => {
   return (
     <div className='w-full h-[100vh] flex flex-col justify-center items-center z-40'>
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
+        <div className="fixed inset-0 flex items-center justify-center dark:bg-[#000000b0] bg-[#ffffffc9] bg-opacity-75 z-50">
           <div className="loader border-t-4 border-primary rounded-full w-12 h-12 animate-spin"></div>
         </div>
       )}
