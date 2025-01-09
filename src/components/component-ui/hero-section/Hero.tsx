@@ -3,12 +3,15 @@ import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, BoxIcon } from 'lucide-react'
 import Link from 'next/link'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 const Image = dynamic(() => import('next/image'), { ssr: false });
 
 const Hero: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const setPlaybackSpeed = () => {
@@ -22,8 +25,19 @@ const Hero: React.FC = () => {
     return () => clearTimeout(timeoutId);
   }, []);
 
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    setLoading(true);
+    e.preventDefault();
+    router.push(e.currentTarget.href);
+  };
+
   return (
     <div className='w-full h-[100vh] flex flex-col justify-center items-center z-40'>
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
+          <div className="loader border-t-4 border-primary rounded-full w-12 h-12 animate-spin"></div>
+        </div>
+      )}
       <span className='w-6 h'>
         <Image width='24' height={10} src="/img/down-arrow.png" loading="lazy" className='dark:invert h-12 animate-bounce absolute bottom-3 right-3' alt="Down Arrow" />
       </span>
@@ -36,7 +50,7 @@ const Hero: React.FC = () => {
       <h2 className="scroll-m-20 text-4xl px-3 font-extrabold tracking-tight lg:text-5xl text-center -z-20">Find your stay easily in Hazaribagh</h2>
       <p className="leading-5 my-3 text-sm font-semibold text-center w-[90%] sm:px-[300px] px-5">The king, seeing how much happier his subjects were, realized the error of his ways and repealed the joke tax.</p>
       <div className='flex items-center gap-3'>
-        <Link href={'/lodge'}><Button variant={'default'} className='border py-[19px]'>Get Started</Button></Link>
+        <Link href={'/lodge'} onClick={handleLinkClick}><Button variant={'default'} className='border py-[19px]'>Get Started</Button></Link>
         <Button variant={'outline'} className='border py-[19px]'>Github</Button>
       </div>
     </div>
