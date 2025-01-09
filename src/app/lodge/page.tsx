@@ -3,16 +3,15 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { IndianRupee } from "lucide-react";
 import { fetchLodges } from "../../../HandleRequest/GetData";
-import { Span } from "next/dist/trace";
-
-
+import { useRouter } from "next/navigation";
 
 // Sample Loader Component
 const Loader = () => (
-  <div className="flex justify-center items-center h-[85vh]">
+  <div className="flex justify-center items-center h-[85vh]" role="status" aria-label="Loading">
     <div className="loader border-t-4 border-primary rounded-full w-12 h-12 animate-spin"></div>
   </div>
 );
@@ -39,51 +38,36 @@ const Page: React.FC = ({ searchParams }: any) => {
   const [lodges, setLodges] = useState<DataType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [imageLoading, setImageLoading] = useState<Record<string, boolean>>({});
+  const [linkLoading, setLinkLoading] = useState<boolean>(false);
+  const router = useRouter();
 
-  const search = (searchParams.search);
-  // if(search)
-  // let search = searchParam.split(' ')[0]
-  // console.log(search)
+  const search = searchParams.search;
 
   const fetchData = async () => {
-    // setLoading(true)
-    let data: any = await fetchLodges()
-    // console.log(data)
-    setLodges(data)
-    setLoading(false)
-  }
-
+    let data: any = await fetchLodges();
+    setLodges(data);
+    setLoading(false);
+  };
 
   const fetchSearchData = async () => {
-
     const response = await fetch('/api/searchLodge', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        search,
-      }),
+      body: JSON.stringify({ search }),
     });
-    // console.log(await response.json())
-    setLodges(await response.json())
-    setLoading(false)
-
-  }
+    setLodges(await response.json());
+    setLoading(false);
+  };
 
   useEffect(() => {
     if (search) {
-
-
-      fetchSearchData()
-
-
-
+      fetchSearchData();
     } else {
-      fetchData()
+      fetchData();
     }
-
-  }, []);
+  }, [search]);
 
   const handleImageLoadStart = (id: string) => {
     setImageLoading((prev) => ({ ...prev, [id]: true }));
@@ -93,7 +77,13 @@ const Page: React.FC = ({ searchParams }: any) => {
     setImageLoading((prev) => ({ ...prev, [id]: false }));
   };
 
-  if (loading) return <Loader />;
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    e.preventDefault();
+    setLinkLoading(true);
+    router.push(e.currentTarget.href);
+  };
+
+  if (loading || linkLoading) return <Loader />;
 
   return (
     <div>
@@ -117,13 +107,14 @@ const Page: React.FC = ({ searchParams }: any) => {
                       ? "bg-pink-600 hover:bg-[#ab107ac3]"
                       : "hover:bg-yellow-600 bg-[#d99a2eb8]"
                     }`}
+                  aria-label={`Category: ${lodge.Category || "Uncategorized"}`}
                 >
                   {lodge?.Category || "Uncategorized"}
                 </span>
 
                 {/* Show spinner while the image is loading */}
                 {imageLoading[lodge.id] && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100" role="status" aria-label="Loading Image">
                     <div className="loader border-t-4 border-primary rounded-full w-8 h-8 animate-spin"></div>
                   </div>
                 )}
@@ -133,7 +124,6 @@ const Page: React.FC = ({ searchParams }: any) => {
                   alt={lodge.LodgeName || "Lodge Thumbnail"}
                   width={230}
                   height={128}
-                  loading="lazy"
                   className="sm:w-full w-44 sm:h-32 h-full object-cover sm:rounded-t-md rounded-md"
                   onLoadingComplete={() => handleImageLoadComplete(lodge.id)}
                   onLoadStart={() => handleImageLoadStart(lodge.id)}
@@ -150,7 +140,6 @@ const Page: React.FC = ({ searchParams }: any) => {
                       ? lodge.Address.split(" ").slice(0, 7).join(" ") + (lodge.Address.split(" ").length > 7 ? "..." : "")
                       : "No address available."}
                   </p>
-
                 </div>
                 <div className="flex items-center justify-between sm:pt-0 pt-3">
                   <p className="flex items-center">
@@ -158,7 +147,7 @@ const Page: React.FC = ({ searchParams }: any) => {
                     <IndianRupee className="w-3.5 h-3.5" />
                     <span>/Room</span>
                   </p>
-                  <Link href={`/view/${lodge.id}`}>
+                  <Link href={`/view/${lodge.id}`} onClick={handleLinkClick}>
                     <button className="text-sm font-semibold text-white bg-primary p-2 rounded-md">
                       View More
                     </button>

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/config/FirebaseConfig";
@@ -16,38 +16,48 @@ const Page = () => {
     const [isImageLoading, setIsImageLoading] = useState<boolean>(true);
     const [isMounted, setIsMounted] = useState(false); // Track client-side rendering
 
+    const sizeArr = 
+        {
+            Small: '10X10',
+            Big: '12X12',
+            Large: 'Large',
+            NA: 'NA'
+        }
+    
+
     useEffect(() => {
         setIsMounted(true); // Mark component as mounted
     }, []);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                if (!path.lodgename) return;
+    const fetchData = useCallback(async () => {
+        try {
+            if (!path.lodgename) return;
 
-                const lodgeId = path.lodgename;
-                const docRef = doc(db, "LodgeData", lodgeId);
-                const docSnap = await getDoc(docRef);
+            const lodgeId = path.lodgename;
+            const docRef = doc(db, "LodgeData", lodgeId);
+            const docSnap = await getDoc(docRef);
 
-                if (docSnap.exists()) {
-                    const lodgeData = docSnap.data();
-                    setData(lodgeData);
-                    setImageShow(lodgeData?.LodgeThumbnail?.[0] || null);
-                } else {
-                    console.warn("No such document!");
-                }
-            } catch (err) {
-                console.error("Error fetching lodge data:", err);
+            if (docSnap.exists()) {
+                const lodgeData = docSnap.data();
+                setData(lodgeData);
+                setImageShow(lodgeData?.LodgeThumbnail?.[0] || null);
+            } else {
+                console.warn("No such document!");
             }
-        };
+        } catch (err) {
+            console.error("Error fetching lodge data:", err);
+        }
+    }, [path.lodgename]);
 
+    useEffect(() => {
         if (isMounted) fetchData();
-    }, [path.lodgename, isMounted]);
+    }, [fetchData, isMounted]);
 
-    const handleImageChange = (imageUrl: string) => {
+    const handleImageChange = useCallback((imageUrl: string) => {
+        if(imageUrl==imageShow) return
         setIsImageLoading(true);
         setImageShow(imageUrl);
-    };
+    }, [imageShow]);
 
     // Prevent rendering on the server
     if (!isMounted) return null;
@@ -141,7 +151,9 @@ const Page = () => {
                         </li>
                         <li className="flex justify-between items-center bg-card p-4 rounded-md shadow-sm">
                             <p className="text-sm font-light">Room Size:</p>
-                            <h3 className="text-lg font-semibold">{data?.Size || <Skeleton className="w-16 h-6" />}</h3>
+                            <h3 className="text-lg font-semibold">{
+                                data?.Size
+                                 || <Skeleton className="w-16 h-6" />}</h3>
                         </li>
                         <li className="flex justify-between items-center bg-card p-4 rounded-md shadow-sm">
                             <p className="text-sm font-light">Room Type:</p>
@@ -168,6 +180,6 @@ const Page = () => {
             </div>
         </div>
     );
-};
+}; 
 
 export default Page;

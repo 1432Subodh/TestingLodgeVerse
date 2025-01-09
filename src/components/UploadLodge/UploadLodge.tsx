@@ -7,18 +7,59 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import toast, { Toaster } from 'react-hot-toast';
-import { json } from 'stream/consumers';
 
 function UploadLodge() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const RawUser = localStorage.getItem('user')
 
+    const resizeImage = (file: File, maxWidth: number, maxHeight: number, maxSizeKB: number): Promise<File> => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                img.src = e.target?.result as string;
+            };
+
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round((height *= maxWidth / width));
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = Math.round((width *= maxHeight / height));
+                        height = maxHeight;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                ctx?.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob((blob) => {
+                    if (blob && blob.size / 1024 <= maxSizeKB) {
+                        resolve(new File([blob], file.name, { type: file.type }));
+                    } else {
+                        reject(new Error('Image size exceeds the maximum limit.'));
+                    }
+                }, file.type);
+            };
+
+            reader.onerror = (error) => reject(error);
+            reader.readAsDataURL(file);
+        });
+    };
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
-        const MAX_FILE_SIZE = 1 * 1024 * 1024;
 
         const form = e.target as HTMLFormElement;
         const tokenizeString = (input: string): string[] => {
@@ -47,39 +88,24 @@ function UploadLodge() {
 
         // Prepare files for upload
         const fileInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="file"]'));
-        // const oversizedFiles = fileInputs.filter((fileInput) => {
-        //     const file = fileInput.files?.[0];
-        //     return file && file.size > MAX_FILE_SIZE;
-        // });
-
-        // If there are oversized files, show an error and exit
-        // Check for oversized files and map to their original indices
-        const oversizedFiles = fileInputs
-            .map((fileInput, index) => ({ fileInput, index })) // Include original index
-            .filter(({ fileInput }) => {
-                const file = fileInput.files?.[0];
-                return file && file.size > MAX_FILE_SIZE;
-            });
-
-        if (oversizedFiles.length > 0) {
-            oversizedFiles.forEach(({ index }) => {
-                toast.error(`File ${index + 1} exceeds 1MB. Please upload smaller files.`);
-            });
-            return; // Exit without hitting the API
-        }
-
 
         const files = await Promise.all(
             fileInputs.map(async (fileInput, index) => {
                 const file = fileInput.files?.[0];
                 if (file) {
-                    const prefix = `LodgeImage/Image_${index + 1}`;
-                    const content = await file.arrayBuffer();
-                    return {
-                        name: file.name,
-                        content: Buffer.from(content).toString('base64'),
-                        prefix,
-                    };
+                    try {
+                        const resizedFile = await resizeImage(file, 800, 800, 300); // Resize image to 800x800 and ensure size is under 300KB
+                        const prefix = `LodgeImage/Image_${index + 1}`;
+                        const content = await resizedFile.arrayBuffer();
+                        return {
+                            name: resizedFile.name,
+                            content: Buffer.from(content).toString('base64'),
+                            prefix,
+                        };
+                    } catch (error) {
+                        toast.error(`File ${index + 1} exceeds 300KB after resizing. Please upload smaller files.`);
+                        return null;
+                    }
                 }
                 return null;
             })
@@ -132,8 +158,6 @@ function UploadLodge() {
         );
     };
 
-
-
     return (
         <>
             <form onSubmit={handleSubmit}>
@@ -181,9 +205,10 @@ function UploadLodge() {
                                 <SelectValue placeholder="Select size" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="Small">10x10 (Small)</SelectItem>
-                                <SelectItem value="Big">12x12 (Big)</SelectItem>
+                                <SelectItem value="Small (10X10)">10x10 (Small)</SelectItem>
+                                <SelectItem value="Big (12X12)">12x12 (Big)</SelectItem>
                                 <SelectItem value="Large">Large</SelectItem>
+                                <SelectItem value="NA">NA</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -234,7 +259,7 @@ function UploadLodge() {
                     <div className="flex justify-end mt-4">
                         <button
                             type="submit"
-                            className="bg-background hover:bg-accent px-3 py-1.5 rounded-md"
+                            className="bg-primary hover:bg-accent px-3 py-1.5 rounded-md"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? "Submitting..." : "Submit"}

@@ -61,23 +61,26 @@ export async function POST(req: Request) {
 }
 
 
-export async function GET(){
+export async function GET() {
     try {
-        
-        const querySnapshot: QuerySnapshot<DocumentData> = await getDocs(collection(db, "LodgeData"));
-        const fetchedLodges: any[] = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        // console.log(fetchedLodges)
-        return NextResponse.json(fetchedLodges)
-
-    } catch (error) {
-        console.error("Error fetching lodges:", error);
-        return NextResponse.json(
-            { success: false, message: "Failed to fetch lodges" },
-            { status: 500 }
-        )
+      // Fetch documents from the "LodgeData" collection
+      const querySnapshot: QuerySnapshot<DocumentData> = await getDocs(collection(db, "LodgeData"));
+      
+      // Map Firestore documents to an array of objects
+      const fetchedLodges = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+  
+      // Return the fetched lodges as a JSON response
+      return NextResponse.json(fetchedLodges);
+    } catch (error:any) {
+      console.error("Error fetching lodges:", error);
+      
+      // Handle the error and return a 500 status
+      return NextResponse.json(
+        { success: false, message: "Failed to fetch lodges", error: error.message },
+        { status: 500 }
+      );
     }
-
-}
+  }
