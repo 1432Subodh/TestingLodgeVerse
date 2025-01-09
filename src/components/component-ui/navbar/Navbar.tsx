@@ -9,7 +9,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import UserLogo from './UserLogo';
 
-const Navbar = React.memo(() => {
+const Navbar = () => {
   return (
     <header className="flex items-center justify-between sm:px-10 px-4 py-2 border-b fixed top-0 left-0 w-full backdrop-blur-sm z-50">
       {/* Logo and Navigation */}
@@ -38,6 +38,8 @@ const Navbar = React.memo(() => {
       </div>
     </header>
   );
-});
+};
+
+// Navbar.displayName = 'Navbar';
 
 export default Navbar;

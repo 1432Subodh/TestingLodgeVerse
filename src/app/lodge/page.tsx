@@ -3,11 +3,9 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-
 import { Card, CardContent } from "@/components/ui/card";
 import { IndianRupee } from "lucide-react";
 import { fetchLodges } from "../../../HandleRequest/GetData";
-import { useRouter } from "next/navigation";
 
 // Sample Loader Component
 const Loader = () => (
@@ -38,8 +36,6 @@ const Page: React.FC = ({ searchParams }: any) => {
   const [lodges, setLodges] = useState<DataType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [imageLoading, setImageLoading] = useState<Record<string, boolean>>({});
-  const [linkLoading, setLinkLoading] = useState<boolean>(false);
-  const router = useRouter();
 
   const search = searchParams.search;
 
@@ -49,19 +45,19 @@ const Page: React.FC = ({ searchParams }: any) => {
     setLoading(false);
   };
 
-  const fetchSearchData = async () => {
-    const response = await fetch('/api/searchLodge', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ search }),
-    });
-    setLodges(await response.json());
-    setLoading(false);
-  };
-
   useEffect(() => {
+    const fetchSearchData = async () => {
+      const response = await fetch('/api/searchLodge', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ search }),
+      });
+      setLodges(await response.json());
+      setLoading(false);
+    };
+
     if (search) {
       fetchSearchData();
     } else {
@@ -77,13 +73,7 @@ const Page: React.FC = ({ searchParams }: any) => {
     setImageLoading((prev) => ({ ...prev, [id]: false }));
   };
 
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    e.preventDefault();
-    setLinkLoading(true);
-    router.push(e.currentTarget.href);
-  };
-
-  if (loading || linkLoading) return <Loader />;
+  if (loading) return <Loader />;
 
   return (
     <div>
@@ -147,7 +137,7 @@ const Page: React.FC = ({ searchParams }: any) => {
                     <IndianRupee className="w-3.5 h-3.5" />
                     <span>/Room</span>
                   </p>
-                  <Link href={`/view/${lodge.id}`} onClick={handleLinkClick}>
+                  <Link href={`/view/${lodge.id}`}>
                     <button className="text-sm font-semibold text-white bg-primary p-2 rounded-md">
                       View More
                     </button>
