@@ -15,7 +15,7 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-export const metadata:Metadata = {
+export const metadata: Metadata = {
   title: "Lodge Verse",
   description: "Discover, manage, and explore comfortable and affordable lodging options with ease on Lodge Verse.",
   icons: {
@@ -41,20 +41,23 @@ export default function RootLayout({
   // const scroll = new LocomotiveScroll();
   return (
     <html lang="en">
+      <head>
+        <meta name="google-site-verification" content="NeCP9-mHATEt4Utgzw8A3TxgHDXCelYJGuF9zyCxywI" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
 
         <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            themes={['light', 'dark']}
-            disableTransitionOnChange
-            >
-            <Navbar/>
-            {children}
-          </ThemeProvider>
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          themes={['light', 'dark']}
+          disableTransitionOnChange
+        >
+          <Navbar />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
