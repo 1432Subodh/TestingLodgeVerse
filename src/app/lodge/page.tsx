@@ -75,11 +75,11 @@ const Page: React.FC = ({ searchParams }: any) => {
 
   if (loading) return <Loader />;
 
-  const handleLink = ()=>{
-    setLoading(true)
-  if (loading) return <Loader />;
+  // const handleLink = ()=>{
+  //   setLoading(true)
+  // if (loading) return <Loader />;
     
-  }
+  // }
 
   return (
     <div>
@@ -143,7 +143,7 @@ const Page: React.FC = ({ searchParams }: any) => {
                     <IndianRupee className="w-3.5 h-3.5" />
                     <span>/Room</span>
                   </p>
-                  <Link href={`/view/${lodge.id}`} onClick={handleLink}>
+                  <Link href={`/view/${lodge.id}`} >
                     <button className="text-sm font-semibold text-white bg-primary p-2 rounded-md">
                       View More
                     </button>
