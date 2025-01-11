@@ -8,7 +8,7 @@ import { IndianRupee } from "lucide-react";
 import { fetchLodges } from "../../../HandleRequest/GetData";
 
 // Sample Loader Component
-export const Loader = () => (
+const Loader = () => (
   <div className="flex justify-center items-center h-[85vh]" role="status" aria-label="Loading">
     <div className="loader border-t-4 border-primary rounded-full w-12 h-12 animate-spin"></div>
   </div>
@@ -75,11 +75,11 @@ const Page: React.FC = ({ searchParams }: any) => {
 
   if (loading) return <Loader />;
 
-  // const handleLink = ()=>{
-  //   setLoading(true)
-  // if (loading) return <Loader />;
+  const handleLink = ()=>{
+    setLoading(true)
+  if (loading) return <Loader />;
     
-  // }
+  }
 
   return (
     <div>
@@ -143,7 +143,7 @@ const Page: React.FC = ({ searchParams }: any) => {
                     <IndianRupee className="w-3.5 h-3.5" />
                     <span>/Room</span>
                   </p>
-                  <Link href={`/view/${lodge.id}`} >
+                  <Link href={`/view/${lodge.id}`} onClick={handleLink}>
                     <button className="text-sm font-semibold text-white bg-primary p-2 rounded-md">
                       View More
                     </button>
