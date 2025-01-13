@@ -4,7 +4,7 @@ import { GitHubLogoIcon, LinkedInLogoIcon, TwitterLogoIcon } from '@radix-ui/rea
 
 function Footer() {
   return (
-    <>
+    <footer>
       <div className='w-full flex justify-between sm:px-40 px-5 mt-16'>
         <div className='border-t-2 dark:border-zinc-100 border-zinc-900 w-80 min-h-44 uppercase text-[0.6rem] tracking-wider font-bold flex items-center text-center justify-center flex-col gap-1 [&>*]:cursor-pointer'>
           <p>Privacy policy</p>
@@ -14,15 +14,15 @@ function Footer() {
         </div>
         <div className='w-64 min-h-44 flex flex-col items-center relative'>
           <div className='flex gap-2 justify-center absolute -top-4 flex-col'>
-            <h1 className={`${BebasNeue.className} font-semibold tracking-wider text-xl text-center leading-[.50rem]`}>lodge/ui</h1>
-            <p className='text-center text-xs capitalize'>The lodge finding website.</p>
+            <h2 className={`${BebasNeue.className} font-semibold tracking-wider text-xl text-center leading-[.50rem]`}>lodgeVerse</h2>
+            <h1 className='text-center text-xs capitalize'>The lodge finding website at Hazaribagh.</h1>
           </div>
           <div className='flex w-full justify-between items-center h-50% sm:px-10 mb-10 px-2 mt-14'>
             <span>
-              <GitHubLogoIcon width={20} height={20} />
+              <GitHubLogoIcon width={20} height={20}  />
             </span>
             <span>
-              <LinkedInLogoIcon width={20} height={20} />
+              <LinkedInLogoIcon width={20} height={20}  />
             </span>
             <span>
               <TwitterLogoIcon width={20} height={20} />
@@ -38,7 +38,7 @@ function Footer() {
         </div>
       </div>
       <p className='text-center text-sm my-5'>© 2024 Lodgeui, Inc. | Subodh Ravidas</p>
-    </>
+    </footer>
   )
 }
 

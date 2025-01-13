@@ -4,7 +4,7 @@ import SecondSection from "@/components/component-ui/second-section/SecondSectio
 
 export default function Home() {
   return (
-    <div className="">
+    <div>
       <Hero />
       <SecondSection />
       <Footer />

@@ -42,12 +42,12 @@ const Hero: React.FC = () => {
         <Image width='24' height={10} src="/img/down-arrow.png" loading="lazy" className='dark:invert h-12 animate-bounce absolute bottom-3 right-3' alt="Down Arrow" />
       </span>
       <video src="video/line-back.mp4" autoPlay loop muted playsInline ref={videoRef} className="dark:mix-blend-screen opacity-20 mix-blend-exclusion w-full h-[100vh] object-cover absolute -z-50 top-0"></video>
-      <p className='text-sm px-2 py-1 flex gap-2 -z-20 items-center font-semibold dark:bg-zinc-900 bg-zinc-200 rounded-[.5rem] cursor-pointer hover:bg-zinc-800'>
+      <h1 className='text-sm px-2 py-1 flex gap-2 -z-20 items-center font-semibold dark:bg-zinc-900 bg-zinc-200 rounded-[.5rem] cursor-pointer hover:bg-zinc-800'>
         <BoxIcon width='16' height='16' />
         Introducing Lodge Finder
         <ArrowRight width='16' height='16' />
-      </p>
-      <h2 className="scroll-m-20 text-4xl px-3 font-extrabold tracking-tight lg:text-5xl text-center -z-20">Find your stay easily in Hazaribagh</h2>
+      </h1>
+      <h1 className="scroll-m-20 text-4xl px-3 font-extrabold tracking-tight lg:text-5xl text-center -z-20">Find your stay easily in Hazaribagh</h1>
       <p className="leading-5 my-3 text-sm font-semibold text-center w-[90%] sm:px-[300px] px-5">The king, seeing how much happier his subjects were, realized the error of his ways and repealed the joke tax.</p>
       <div className='flex items-center gap-3'>
         <Link href={'/lodge'} onClick={handleLinkClick}><Button variant={'default'} className='border py-[19px]'>Get Started</Button></Link>
