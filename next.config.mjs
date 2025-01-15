@@ -27,7 +27,6 @@ const nextConfig = {
   },
   experimental: {
     optimizeCss: true,
-    optimizeFonts: true,
   },
   webpack(config) {
     config.optimization.minimize = true;

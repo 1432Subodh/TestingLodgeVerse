@@ -41,7 +41,16 @@ const Hero: React.FC = () => {
       <span className='w-6 h'>
         <Image width='24' height={10} src="/img/down-arrow.png" loading="lazy" className='dark:invert h-12 animate-bounce absolute bottom-3 right-3' alt="Down Arrow" />
       </span>
-      <video src="video/line-back.webm" autoPlay loop muted playsInline ref={videoRef} className="dark:mix-blend-screen opacity-20 mix-blend-exclusion w-full h-[100vh] object-cover absolute -z-50 top-0"></video>
+      <video 
+        src="video/line-back.webm" 
+        autoPlay 
+        loop 
+        muted 
+        playsInline 
+        ref={videoRef} 
+        className="dark:mix-blend-screen opacity-20 mix-blend-exclusion w-full h-[100vh] object-cover absolute -z-50 top-0"
+        title="Lodge Finder Introduction Video"
+      ></video>
       <h1 className='text-sm px-2 py-1 flex gap-2 -z-20 items-center font-semibold dark:bg-zinc-900 bg-zinc-200 rounded-[.5rem] cursor-pointer hover:bg-zinc-800'>
         <BoxIcon width='16' height='16' />
         Introducing Lodge Finder
